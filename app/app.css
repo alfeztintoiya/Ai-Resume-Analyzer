@@ -89,7 +89,7 @@ form {
   }
 
   .resume-card-header {
-    @apply flex flex-row gap-2 justify-between min-h-[110px] max-sm:flex-col items-center max-md:justify-center max-md:items-center;
+    @apply flex flex-row gap-2 justify-center min-h-[110px] max-sm:flex-col items-center;
   }
 
   .feedback-section {
