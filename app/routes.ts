@@ -4,4 +4,5 @@ export default [
     index("routes/home.tsx"),
     route('auth', 'routes/auth.tsx'),
     route('upload', 'routes/upload.tsx'),
+    route('test-pdf', 'routes/test-pdf.tsx'),
 ] satisfies RouteConfig;
