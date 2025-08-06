@@ -1,13 +1,8 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import type { AuthModalProps } from '../types';
 import './AuthModal.css';
-
-interface AuthModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  initialTab?: 'login' | 'signup';
-}
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
   const { login, register, googleLogin } = useAuth();

@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { BarChart3, Menu, X, LogOut, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { getUserFullName, getUserAvatar } from '../utils/userUtils';
+import type { NavbarProps } from '../types';
 import './Navbar.css';
-
-interface NavbarProps {
-  onUploadClick?: () => void;
-  onSignInClick?: () => void;
-}
 
 const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -49,11 +46,11 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
               <>
                 <div className="user-info">
                   <img 
-                    src={user?.profile_pic || '/default-avatar.png'} 
-                    alt={user?.name}
+                    src={getUserAvatar(user)} 
+                    alt={getUserFullName(user)}
                     className="user-avatar"
                   />
-                  <span className="user-name">{user?.name}</span>
+                  <span className="user-name">{getUserFullName(user)}</span>
                 </div>
                 <button 
                   className="btn-secondary"
@@ -100,11 +97,11 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
                 <>
                   <div className="mobile-user-info">
                     <img 
-                      src={user?.avatar || '/default-avatar.png'} 
-                      alt={user?.name}
+                      src={getUserAvatar(user)} 
+                      alt={getUserFullName(user)}
                       className="mobile-user-avatar"
                     />
-                    <span className="mobile-user-name">{user?.name}</span>
+                    <span className="mobile-user-name">{getUserFullName(user)}</span>
                   </div>
                   <button 
                     className="mobile-btn mobile-btn-secondary"

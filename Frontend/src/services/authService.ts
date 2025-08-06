@@ -1,18 +1,7 @@
+import type { User, AuthResponse, CreateUserData, LoginData } from '../types';
+import { normalizeUser } from '../utils/userUtils';
+
 const API_BASE_URL = 'http://localhost:5003/api/v1';
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  profile_pic?: string;
-  created_at: string;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  user?: User;
-  message?: string;
-}
 
 class AuthService {
   // Google OAuth Login
@@ -37,7 +26,7 @@ class AuthService {
       }
 
       const user = await response.json();
-      return { success: true, user };
+      return { success: true, user: normalizeUser(user) };
     } catch (error) {
       console.error('Auth error:', error);
       return { success: false, message: 'Authentication failed' };
@@ -59,13 +48,14 @@ class AuthService {
   // Login with email/password (if you want to implement this later)
   login = async (email: string, password: string): Promise<AuthResponse> => {
     try {
+      const loginData: LoginData = { email, password };
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(loginData),
       });
 
       const data = await response.json();
@@ -77,12 +67,7 @@ class AuthService {
   };
 
   // Register with email/password (if you want to implement this later)
-  register = async (userData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-  }): Promise<AuthResponse> => {
+  register = async (userData: CreateUserData): Promise<AuthResponse> => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: 'POST',
@@ -91,7 +76,8 @@ class AuthService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: `${userData.firstName} ${userData.lastName}`,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
           email: userData.email,
           password: userData.password,
         }),
