@@ -4,10 +4,25 @@ import './Navbar.css';
 
 interface NavbarProps {
   onUploadClick?: () => void;
+  onSignInClick?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onUploadClick }) => {
+const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSignInClick = () => {
+    setMobileMenuOpen(false);
+    if (onSignInClick) {
+      onSignInClick();
+    }
+  };
+
+  const handleGetStartedClick = () => {
+    setMobileMenuOpen(false);
+    if (onUploadClick) {
+      onUploadClick();
+    }
+  };
 
   return (
     <header className="header">
@@ -28,12 +43,12 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick }) => {
           </nav>
 
           <div className="header-buttons">
-            <button className="btn-secondary">
+            <button className="btn-secondary" onClick={handleSignInClick}>
               Sign In
             </button>
             <button 
               className="btn-primary"
-              onClick={onUploadClick}
+              onClick={handleGetStartedClick}
             >
               Get Started
             </button>
@@ -57,10 +72,10 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick }) => {
             <a href="#pricing" className="mobile-nav-link">Pricing</a>
             <a href="#about" className="mobile-nav-link">About</a>
             <div className="mobile-menu-divider">
-              <button className="mobile-btn">Sign In</button>
+              <button className="mobile-btn" onClick={handleSignInClick}>Sign In</button>
               <button 
                 className="mobile-btn mobile-btn-primary"
-                onClick={onUploadClick}
+                onClick={handleGetStartedClick}
               >
                 Get Started
               </button>

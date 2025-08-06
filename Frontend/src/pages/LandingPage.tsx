@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Upload, FileText, BarChart3, Users, Shield, CheckCircle, AlertCircle, Clock, TrendingUp, Star, ArrowRight, X } from 'lucide-react';
 import './LandingPage.css';
 import Navbar from '../components/Navbar';
+import AuthModal from '../components/AuthModal';
 
 interface FilePreviewProps {
   file: File;
@@ -79,6 +80,8 @@ const LandingPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'login' | 'signup'>('login');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Intersection Observer for scroll animations
@@ -175,10 +178,34 @@ const LandingPage = () => {
     }
   };
 
+  const handleSignInClick = () => {
+    setAuthModalTab('login');
+    setAuthModalOpen(true);
+  };
+
+  const handleSignUpClick = () => {
+    setAuthModalTab('signup');
+    setAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => {
+    setAuthModalOpen(false);
+  };
+
   return (
     <div className="landing-page">
       {/* Header */}
-      <Navbar onUploadClick={openFileDialog} />
+      <Navbar 
+        onUploadClick={openFileDialog} 
+        onSignInClick={handleSignInClick}
+      />
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={authModalOpen}
+        onClose={closeAuthModal}
+        initialTab={authModalTab}
+      />
 
       {/* Hero Section */}
       <section className="hero-section">
@@ -199,8 +226,11 @@ const LandingPage = () => {
                 <Upload className="w-5 h-5" />
                 Upload Resume
               </button>
-              <button className="btn-hero-secondary">
-                View Sample Analysis
+              <button 
+                className="btn-hero-secondary"
+                onClick={handleSignUpClick}
+              >
+                Sign Up Free
               </button>
             </div>
           </div>
@@ -420,7 +450,7 @@ const LandingPage = () => {
               Join thousands of professionals who have improved their job prospects with our AI-powered resume analysis.
             </p>
             <button 
-              onClick={openFileDialog}
+              onClick={handleSignUpClick}
               className="cta-button"
             >
               Get Started Now
