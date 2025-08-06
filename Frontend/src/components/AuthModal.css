@@ -213,6 +213,17 @@
   animation: slideInUp 0.3s ease-out;
 }
 
+.auth-error-message {
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  animation: slideInUp 0.3s ease-out;
+}
+
 .password-toggle {
   position: absolute;
   right: 12px;

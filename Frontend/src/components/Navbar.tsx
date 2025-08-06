@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BarChart3, Menu, X } from 'lucide-react';
+import { BarChart3, Menu, X, LogOut, User } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import './Navbar.css';
 
 interface NavbarProps {
@@ -8,6 +9,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignInClick = () => {
@@ -43,15 +45,37 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
           </nav>
 
           <div className="header-buttons">
-            <button className="btn-secondary" onClick={handleSignInClick}>
-              Sign In
-            </button>
-            <button 
-              className="btn-primary"
-              onClick={handleGetStartedClick}
-            >
-              Get Started
-            </button>
+            {isAuthenticated ? (
+              <>
+                <div className="user-info">
+                  <img 
+                    src={user?.profile_pic || '/default-avatar.png'} 
+                    alt={user?.name}
+                    className="user-avatar"
+                  />
+                  <span className="user-name">{user?.name}</span>
+                </div>
+                <button 
+                  className="btn-secondary"
+                  onClick={logout}
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn-secondary" onClick={handleSignInClick}>
+                  Sign In
+                </button>
+                <button 
+                  className="btn-primary"
+                  onClick={handleGetStartedClick}
+                >
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
 
           <button 
@@ -72,13 +96,38 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
             <a href="#pricing" className="mobile-nav-link">Pricing</a>
             <a href="#about" className="mobile-nav-link">About</a>
             <div className="mobile-menu-divider">
-              <button className="mobile-btn" onClick={handleSignInClick}>Sign In</button>
-              <button 
-                className="mobile-btn mobile-btn-primary"
-                onClick={handleGetStartedClick}
-              >
-                Get Started
-              </button>
+              {isAuthenticated ? (
+                <>
+                  <div className="mobile-user-info">
+                    <img 
+                      src={user?.avatar || '/default-avatar.png'} 
+                      alt={user?.name}
+                      className="mobile-user-avatar"
+                    />
+                    <span className="mobile-user-name">{user?.name}</span>
+                  </div>
+                  <button 
+                    className="mobile-btn mobile-btn-secondary"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      logout();
+                    }}
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="mobile-btn" onClick={handleSignInClick}>Sign In</button>
+                  <button 
+                    className="mobile-btn mobile-btn-primary"
+                    onClick={handleGetStartedClick}
+                  >
+                    Get Started
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

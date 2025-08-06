@@ -16,13 +16,17 @@
     "@supabase/supabase-js": "^2.53.0",
     "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
+    "cookie-session": "^2.1.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
     "prisma": "^6.13.0"

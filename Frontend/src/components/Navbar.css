@@ -106,6 +106,55 @@
   background-color: #2563eb;
 }
 
+/* User Info Styles */
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mobile User Info */
+.mobile-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 8px;
+}
+
+.mobile-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e5e7eb;
+}
+
+.mobile-user-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
 .mobile-menu-btn {
   display: block;
   padding: 8px;

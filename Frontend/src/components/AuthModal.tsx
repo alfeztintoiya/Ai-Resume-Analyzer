@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 import './AuthModal.css';
 
 interface AuthModalProps {
@@ -9,6 +10,7 @@ interface AuthModalProps {
 }
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
+  const { login, register, googleLogin } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>(initialTab);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -47,12 +49,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Login:', loginForm);
+    try {
+      const response = await login(loginForm.email, loginForm.password);
+      if (response.success) {
+        onClose();
+      } else {
+        setErrors({ general: response.message || 'Login failed' });
+      }
+    } catch (error) {
+      setErrors({ general: 'An error occurred during login' });
+    } finally {
       setIsLoading(false);
-      onClose();
-    }, 2000);
+    }
   };
 
   const handleSignupSubmit = async (e: React.FormEvent) => {
@@ -79,17 +87,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Signup:', signupForm);
+    try {
+      const response = await register(signupForm);
+      if (response.success) {
+        onClose();
+      } else {
+        setErrors({ general: response.message || 'Registration failed' });
+      }
+    } catch (error) {
+      setErrors({ general: 'An error occurred during registration' });
+    } finally {
       setIsLoading(false);
-      onClose();
-    }, 2000);
+    }
   };
 
   const handleGoogleSignIn = () => {
-    console.log('Google Sign In');
-    // Implement Google OAuth
+    googleLogin();
   };
 
   const switchTab = (tab: 'login' | 'signup') => {
@@ -146,6 +159,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
               <div className="auth-divider">
                 <span>or</span>
               </div>
+
+              {errors.general && (
+                <div className="auth-error-message">
+                  {errors.general}
+                </div>
+              )}
 
               <form onSubmit={handleLoginSubmit} className="auth-form">
                 <div className="form-group">
@@ -229,6 +248,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
               <div className="auth-divider">
                 <span>or</span>
               </div>
+
+              {errors.general && (
+                <div className="auth-error-message">
+                  {errors.general}
+                </div>
+              )}
 
               <form onSubmit={handleSignupSubmit} className="auth-form">
                 
