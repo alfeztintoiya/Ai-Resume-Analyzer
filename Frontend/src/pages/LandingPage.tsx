@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, FileText, BarChart3, Users, Shield, CheckCircle, AlertCircle, Clock, TrendingUp, Star, ArrowRight, X } from 'lucide-react';
+import { Upload, FileText, BarChart3, Users, Shield, CheckCircle, AlertCircle, TrendingUp, X } from 'lucide-react';
 import './LandingPage.css';
 import Navbar from '../components/Navbar';
 import AuthModal from '../components/AuthModal';
+import { useAuth } from '../contexts/AuthContext';
 
 interface FilePreviewProps {
   file: File;
@@ -76,12 +77,16 @@ const StatCard: React.FC<StatCardProps> = ({ icon, value, label, change, positiv
 };
 
 const LandingPage = () => {
+  const { isAuthenticated } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'signup'>('login');
+  const [companyName, setCompanyName] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Intersection Observer for scroll animations
@@ -144,8 +149,14 @@ const LandingPage = () => {
   const handleAnalyze = () => {
     if (!selectedFile) return;
     
+    // Validate that all required fields are filled
+    if (!companyName.trim() || !jobTitle.trim() || !jobDescription.trim()) {
+      alert('Please fill in all fields: Company Name, Job Title, and Job Description');
+      return;
+    }
+    
     setIsAnalyzing(true);
-    // Simulate analysis
+    // Simulate analysis with job details
     setTimeout(() => {
       setAnalysisResult({
         score: 85,
@@ -158,6 +169,12 @@ const LandingPage = () => {
           experience: 85,
           education: 88,
           skills: 82
+        },
+        jobAnalysis: {
+          companyName,
+          jobTitle,
+          jobDescription: jobDescription.substring(0, 100) + '...',
+          matchScore: 78
         }
       });
       setIsAnalyzing(false);
@@ -167,6 +184,9 @@ const LandingPage = () => {
   const handleRemoveFile = () => {
     setSelectedFile(null);
     setAnalysisResult(null);
+    setCompanyName('');
+    setJobTitle('');
+    setJobDescription('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -190,6 +210,24 @@ const LandingPage = () => {
 
   const closeAuthModal = () => {
     setAuthModalOpen(false);
+  };
+
+  const scrollToUploadSection = () => {
+    const uploadSection = document.querySelector('.upload-section');
+    if (uploadSection) {
+      uploadSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
+  const handleUploadResumeClick = () => {
+    scrollToUploadSection();
+    // Small delay to ensure smooth scrolling starts before opening file dialog
+    setTimeout(() => {
+      openFileDialog();
+    }, 300);
   };
 
   return (
@@ -220,18 +258,20 @@ const LandingPage = () => {
             </p>
             <div className="hero-buttons">
               <button 
-                onClick={openFileDialog}
+                onClick={handleUploadResumeClick}
                 className="btn-hero-primary"
               >
                 <Upload className="w-5 h-5" />
                 Upload Resume
               </button>
-              <button 
-                className="btn-hero-secondary"
-                onClick={handleSignUpClick}
-              >
-                Sign Up Free
-              </button>
+              {!isAuthenticated && (
+                <button 
+                  className="btn-hero-secondary"
+                  onClick={handleSignUpClick}
+                >
+                  Sign Up Free
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -256,36 +296,116 @@ const LandingPage = () => {
               />
 
               {!selectedFile ? (
-                <div
-                  className={`upload-area ${isDragging ? 'dragging' : ''}`}
-                  onClick={openFileDialog}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                >
-                  <Upload className="upload-icon" />
-                  <h3 className="upload-area-title">Upload your resume</h3>
-                  <p className="upload-area-description">Drag and drop your file here, or click to browse</p>
-                  <p className="upload-area-formats">Supports PDF, DOC, DOCX (Max 10MB)</p>
-                </div>
+                <>
+                  {isAuthenticated ? (
+                    <div
+                      className={`upload-area ${isDragging ? 'dragging' : ''}`}
+                      onClick={openFileDialog}
+                      onDrop={handleDrop}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                    >
+                      <Upload className="upload-icon" />
+                      <h3 className="upload-area-title">Upload your resume</h3>
+                      <p className="upload-area-description">Drag and drop your file here, or click to browse</p>
+                      <p className="upload-area-formats">Supports PDF, DOC, DOCX (Max 10MB)</p>
+                    </div>
+                  ) : (
+                    <div className="upload-area login-required">
+                      <div className="shield-lock-icon">
+                        <Shield className="upload-icon shield-outer" />
+                        <div className="lock-inner">
+                          <div className="lock-body"></div>
+                          <div className="lock-shackle"></div>
+                        </div>
+                      </div>
+                      <h3 className="upload-area-title">Authentication Required</h3>
+                      <p className="upload-area-description">Please sign in to upload and analyze your resume</p>
+                      <button 
+                        onClick={handleSignInClick}
+                        className="auth-required-btn"
+                      >
+                        Sign In to Continue
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div>
                   <FilePreview file={selectedFile} onRemove={handleRemoveFile} />
                   
                   {!analysisResult && !isAnalyzing && (
-                    <button
-                      onClick={handleAnalyze}
-                      className="analyze-btn"
-                    >
-                      <BarChart3 className="w-5 h-5" />
-                      Analyze Resume
-                    </button>
+                    <div className="job-details-form">
+                      <h3 className="job-details-title">Job Details</h3>
+                      <p className="job-details-description">
+                        Provide job details to get tailored resume analysis
+                      </p>
+                      
+                      <div className="form-grid">
+                        <div className="form-group">
+                          <label htmlFor="companyName" className="form-label">
+                            Company Name *
+                          </label>
+                          <input
+                            id="companyName"
+                            type="text"
+                            value={companyName}
+                            onChange={(e) => setCompanyName(e.target.value)}
+                            placeholder="e.g., Google, Microsoft, Apple"
+                            className="form-input"
+                            style={{ textAlign: 'left', textIndent: '0', paddingLeft: '12px' }}
+                            dir="ltr"
+                          />
+                        </div>
+                        
+                        <div className="form-group">
+                          <label htmlFor="jobTitle" className="form-label">
+                            Job Title *
+                          </label>
+                          <input
+                            id="jobTitle"
+                            type="text"
+                            value={jobTitle}
+                            onChange={(e) => setJobTitle(e.target.value)}
+                            placeholder="e.g., Frontend Developer, Data Scientist"
+                            className="form-input"
+                            style={{ textAlign: 'left', textIndent: '0', paddingLeft: '12px' }}
+                            dir="ltr"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="jobDescription" className="form-label">
+                          Job Description *
+                        </label>
+                        <textarea
+                          id="jobDescription"
+                          value={jobDescription}
+                          onChange={(e) => setJobDescription(e.target.value)}
+                          placeholder="Paste the job description here..."
+                          className="form-textarea"
+                          rows={6}
+                          style={{ textAlign: 'left', textIndent: '0', paddingLeft: '12px' }}
+                          dir="ltr"
+                        />
+                      </div>
+                      
+                      <button
+                        onClick={handleAnalyze}
+                        className="analyze-btn"
+                        disabled={!companyName.trim() || !jobTitle.trim() || !jobDescription.trim()}
+                      >
+                        <BarChart3 className="w-5 h-5" />
+                        Analyze Resume
+                      </button>
+                    </div>
                   )}
 
                   {isAnalyzing && (
                     <div className="loading-container">
                       <div className="loading-spinner"></div>
-                      <p className="loading-text">Analyzing your resume...</p>
+                      <p className="loading-text">Analyzing your resume and job match...</p>
                     </div>
                   )}
 
@@ -328,6 +448,30 @@ const LandingPage = () => {
                         </div>
                       </div>
 
+                      {analysisResult.jobAnalysis && (
+                        <div className="job-analysis-section">
+                          <h4 className="analysis-section-title">
+                            <BarChart3 className="w-5 h-5" style={{color: '#3b82f6'}} />
+                            Job Match Analysis
+                          </h4>
+                          <div className="job-analysis-content">
+                            <div className="job-analysis-header">
+                              <div className="job-analysis-info">
+                                <p className="job-company">{analysisResult.jobAnalysis.companyName}</p>
+                                <p className="job-title">{analysisResult.jobAnalysis.jobTitle}</p>
+                              </div>
+                              <div className="job-match-score">
+                                <span className="match-score-number">{analysisResult.jobAnalysis.matchScore}%</span>
+                                <span className="match-score-label">Match</span>
+                              </div>
+                            </div>
+                            <div className="job-description-preview">
+                              <p className="job-description-text">{analysisResult.jobAnalysis.jobDescription}</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       <div className="section-scores">
                         <h4 className="section-scores-title">Section Scores</h4>
                         <div className="score-bars">
@@ -352,42 +496,6 @@ const LandingPage = () => {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="stats-section">
-        <div className="container">
-          <div className="stats-grid">
-            <StatCard
-              icon={<Users className="w-6 h-6" />}
-              value="50K+"
-              label="Resumes Analyzed"
-              change="+12%"
-              positive={true}
-            />
-            <StatCard
-              icon={<CheckCircle className="w-6 h-6" />}
-              value="85%"
-              label="Success Rate"
-              change="+5%"
-              positive={true}
-            />
-            <StatCard
-              icon={<Clock className="w-6 h-6" />}
-              value="< 30s"
-              label="Analysis Time"
-              change="-20%"
-              positive={true}
-            />
-            <StatCard
-              icon={<Star className="w-6 h-6" />}
-              value="4.9/5"
-              label="User Rating"
-              change="+0.2"
-              positive={true}
-            />
           </div>
         </div>
       </section>
@@ -439,26 +547,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="cta-section">
-        <div className="container">
-          <div className="cta-container">
-            <h2 className="cta-title">
-              Ready to Optimize Your Resume?
-            </h2>
-            <p className="cta-description">
-              Join thousands of professionals who have improved their job prospects with our AI-powered resume analysis.
-            </p>
-            <button 
-              onClick={handleSignUpClick}
-              className="cta-button"
-            >
-              Get Started Now
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Footer */}
       <footer className="footer">

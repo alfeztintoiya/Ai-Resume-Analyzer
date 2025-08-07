@@ -1,10 +1,7 @@
 export interface User {
   id: string;
   email: string;
-  first_name?: string;  // Match backend snake_case
-  last_name?: string;   // Match backend snake_case
-  firstName?: string;   // Frontend camelCase (computed)
-  lastName?: string;    // Frontend camelCase (computed)
+  name?: string;
   username?: string;
   profile_pic?: string; // Match backend snake_case
   profilePic?: string;  // Frontend camelCase (computed)
@@ -28,8 +25,7 @@ export const UserRole = {
 export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 export interface CreateUserData {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   password: string;
 }
@@ -42,8 +38,7 @@ export interface LoginData {
 export interface UserProfile {
   id: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   username?: string;
   profilePic?: string;
   phone?: string;

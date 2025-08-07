@@ -1,0 +1,180 @@
+/* Avatar Base Styles */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  object-fit: cover;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Avatar Sizes */
+.avatar-small {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  min-width: 24px;
+}
+
+.avatar-medium {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+  min-width: 32px;
+}
+
+.avatar-large {
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+  min-width: 48px;
+}
+
+.avatar-extra-large {
+  width: 64px;
+  height: 64px;
+  font-size: 20px;
+  min-width: 64px;
+}
+
+/* Avatar with Initials */
+.avatar-initials {
+  background: linear-gradient(135deg, var(--bg-color, #6b7280) 0%, var(--bg-color-dark, #4b5563) 100%);
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+}
+
+.avatar-initials::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Hover Effects */
+.avatar-clickable {
+  cursor: pointer;
+}
+
+.avatar-clickable:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.avatar-clickable.avatar-initials:hover::before {
+  opacity: 1;
+}
+
+/* Focus States for Accessibility */
+.avatar-clickable:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Avatar Border Variations */
+.avatar-bordered {
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Avatar Status Indicators */
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 25%;
+  height: 25%;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.avatar-status.online {
+  background-color: #10b981;
+}
+
+.avatar-status.offline {
+  background-color: #6b7280;
+}
+
+.avatar-status.busy {
+  background-color: #ef4444;
+}
+
+/* Animation for Initial Load */
+.avatar {
+  animation: avatarFadeIn 0.3s ease-out;
+}
+
+@keyframes avatarFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .avatar-large {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+  
+  .avatar-extra-large {
+    width: 56px;
+    height: 56px;
+    font-size: 18px;
+  }
+}
+
+/* High DPI Display Support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .avatar-initials {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .avatar {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .avatar-bordered {
+    border-color: #374151;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .avatar {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

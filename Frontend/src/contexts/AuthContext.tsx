@@ -67,6 +67,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
   };
 
+  const verifyEmail = async (token: string) => {
+    const response = await authService.verifyEmail(token);
+    if (response.success && response.user) {
+      setUser(response.user);
+    }
+    return response;
+  };
+
+  const resendVerificationEmail = async (email: string) => {
+    return await authService.resendVerificationEmail(email);
+  };
+
   const isAuthenticated = !!user;
 
   const value: AuthContextType = {
@@ -78,6 +90,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     googleLogin,
     logout,
     checkAuth,
+    verifyEmail,
+    resendVerificationEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

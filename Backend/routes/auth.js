@@ -2,6 +2,14 @@ const express = require("express");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const supabase = require("../utils/supabaseClient");
+const { verifyUser } = require("../controllers/userData");
+const {
+  login,
+  signup,
+  logout,
+  verifyEmail,
+  resendVerificationEmail,
+} = require("../controllers/auth");
 
 const router = express.Router();
 
@@ -33,39 +41,16 @@ router.get(
   }
 );
 
-router.get("/me", async (req, res) => {
-  try {
-    const token = req.cookies.token;
+router.get("/verify", verifyUser);
+router.get("/me", verifyUser); // Add /me endpoint for frontend compatibility
 
-    if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: "No token provided" });
-    }
+// Email verification routes
+router.get("/verify-email", verifyEmail);
+router.post("/resend-verification", resendVerificationEmail);
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { data: user, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("email", decoded.email)
-      .single();
-
-    if (error || !user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "User not found" });
-    }
-
-    res.json(user);
-  } catch (error) {
-    console.error("Auth error:", error);
-    res.status(401).json({ success: false, message: "Invalid token" });
-  }
-});
-
-router.post("/logout", (req, res) => {
-  res.clearCookie("token");
-  res.json({ success: true, message: "Logged out successfully" });
-});
+// Authentication routes
+router.post("/signup", signup);
+router.get("/login", login);
+router.post("/logout", logout);
 
 module.exports = router;

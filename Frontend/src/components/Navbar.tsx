@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { BarChart3, Menu, X, LogOut, User } from 'lucide-react';
+import { BarChart3, Menu, X, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { getUserFullName, getUserAvatar } from '../utils/userUtils';
+import { getUserFullName } from '../utils/userUtils';
+import Avatar from './Avatar';
 import type { NavbarProps } from '../types';
 import './Navbar.css';
 
@@ -45,9 +46,9 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
             {isAuthenticated ? (
               <>
                 <div className="user-info">
-                  <img 
-                    src={getUserAvatar(user)} 
-                    alt={getUserFullName(user)}
+                  <Avatar 
+                    user={user}
+                    size="medium"
                     className="user-avatar"
                   />
                   <span className="user-name">{getUserFullName(user)}</span>
@@ -96,9 +97,9 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
               {isAuthenticated ? (
                 <>
                   <div className="mobile-user-info">
-                    <img 
-                      src={getUserAvatar(user)} 
-                      alt={getUserFullName(user)}
+                    <Avatar 
+                      user={user}
+                      size="small"
                       className="mobile-user-avatar"
                     />
                     <span className="mobile-user-name">{getUserFullName(user)}</span>

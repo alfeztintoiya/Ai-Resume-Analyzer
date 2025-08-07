@@ -6,8 +6,6 @@ import type { User } from '../types/user';
 export const normalizeUser = (user: any): User => {
   return {
     ...user,
-    firstName: user.first_name || user.firstName,
-    lastName: user.last_name || user.lastName,
     profilePic: user.profile_pic || user.profilePic,
     dateOfBirth: user.date_of_birth || user.dateOfBirth,
     isVerified: user.is_verified ?? user.isVerified,
@@ -17,29 +15,24 @@ export const normalizeUser = (user: any): User => {
 };
 
 /**
- * Get user's full name
+ * Get user's display name
  */
 export const getUserFullName = (user: User | null): string => {
   if (!user) return '';
   
-  const firstName = user.firstName || user.first_name || '';
-  const lastName = user.lastName || user.last_name || '';
-  
-  return `${firstName} ${lastName}`.trim() || user.email || 'User';
+  return user.name || user.email || 'User';
 };
 
 /**
- * Get user's display name (first name or email)
+ * Get user's display name (same as full name now)
  */
 export const getUserDisplayName = (user: User | null): string => {
-  if (!user) return '';
-  
-  const firstName = user.firstName || user.first_name;
-  return firstName || user.email || 'User';
+  return getUserFullName(user);
 };
 
 /**
- * Get user's avatar URL with fallback
+ * Get user's avatar URL with fallback (deprecated - use Avatar component instead)
+ * @deprecated Use Avatar component with getUserAvatarData from avatarUtils
  */
 export const getUserAvatar = (user: User | null): string => {
   if (!user) return '/default-avatar.png';

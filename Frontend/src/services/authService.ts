@@ -1,7 +1,7 @@
-import type { User, AuthResponse, CreateUserData, LoginData } from '../types';
+import type { AuthResponse, CreateUserData, LoginData } from '../types';
 import { normalizeUser } from '../utils/userUtils';
 
-const API_BASE_URL = 'http://localhost:5003/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 class AuthService {
   // Google OAuth Login
@@ -13,7 +13,7 @@ class AuthService {
   // Get current user
   getCurrentUser = async (): Promise<AuthResponse> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
         method: 'GET',
         credentials: 'include', // Include cookies
         headers: {
@@ -69,15 +69,14 @@ class AuthService {
   // Register with email/password (if you want to implement this later)
   register = async (userData: CreateUserData): Promise<AuthResponse> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          firstName: userData.firstName,
-          lastName: userData.lastName,
+          name: userData.name,
           email: userData.email,
           password: userData.password,
         }),
@@ -88,6 +87,45 @@ class AuthService {
     } catch (error) {
       console.error('Register error:', error);
       return { success: false, message: 'Registration failed' };
+    }
+  };
+
+  // Verify email with token
+  verifyEmail = async (token: string): Promise<AuthResponse> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-email?token=${token}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Email verification error:', error);
+      return { success: false, message: 'Email verification failed' };
+    }
+  };
+
+  // Resend verification email
+  resendVerificationEmail = async (email: string): Promise<AuthResponse> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/resend-verification`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      return { success: false, message: 'Failed to resend verification email' };
     }
   };
 }

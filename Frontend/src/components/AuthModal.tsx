@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import type { AuthModalProps } from '../types';
+import EmailVerificationNotice from './EmailVerificationNotice';
 import './AuthModal.css';
 
 const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
@@ -10,6 +11,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showVerificationNotice, setShowVerificationNotice] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState('');
 
   // Form states
   const [loginForm, setLoginForm] = useState({
@@ -18,8 +21,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
   });
 
   const [signupForm, setSignupForm] = useState({
-    firstName: '',
-    lastName: '',
+    name:'',
     email: '',
     password: '',
     confirmPassword: ''
@@ -65,8 +67,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
 
     // Basic validation
     const newErrors: Record<string, string> = {};
-    if (!signupForm.firstName) newErrors.firstName = 'First name is required';
-    if (!signupForm.lastName) newErrors.lastName = 'Last name is required';
+    if (!signupForm.name) newErrors.name = 'Name is required';
     if (!signupForm.email) newErrors.email = 'Email is required';
     if (!signupForm.password) newErrors.password = 'Password is required';
     if (signupForm.password !== signupForm.confirmPassword) {
@@ -85,7 +86,9 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
     try {
       const response = await register(signupForm);
       if (response.success) {
-        onClose();
+        // Show verification notice instead of closing modal
+        setVerificationEmail(signupForm.email);
+        setShowVerificationNotice(true);
       } else {
         setErrors({ general: response.message || 'Registration failed' });
       }
@@ -104,7 +107,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
     setActiveTab(tab);
     setErrors({});
     setLoginForm({ email: '', password: '' });
-    setSignupForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '' });
+    setSignupForm({ name: '', email: '', password: '', confirmPassword: '' });
   };
 
   if (!isOpen) return null;
@@ -117,8 +120,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
         </button>
 
         <div className="auth-modal-content">
-          {/* Tab Headers */}
-          <div className="auth-tabs">
+          {/* Show verification notice if signup was successful */}
+          {showVerificationNotice ? (
+            <EmailVerificationNotice 
+              email={verificationEmail}
+              onClose={onClose}
+            />
+          ) : (
+            <>
+              {/* Tab Headers */}
+              <div className="auth-tabs">
             <button
               className={`auth-tab ${activeTab === 'login' ? 'active' : ''}`}
               onClick={() => switchTab('login')}
@@ -258,13 +269,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
                       <User className="form-input-icon" />
                       <input
                         type="text"
-                        className={`form-input ${errors.firstName ? 'error' : ''}`}
+                        className={`form-input ${errors.name ? 'error' : ''}`}
                         placeholder="Name"
-                        value={signupForm.firstName}
-                        onChange={(e) => setSignupForm({ ...signupForm, firstName: e.target.value })}
+                        value={signupForm.name}
+                        onChange={(e) => setSignupForm({ ...signupForm, name: e.target.value })}
                       />
                     </div>
-                    {errors.firstName && <span className="form-error">{errors.firstName}</span>}
+                    {errors.name && <span className="form-error">{errors.name}</span>}
                   </div>
 
                   {/* <div className="form-group">
@@ -361,6 +372,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
                 </button>
               </form>
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

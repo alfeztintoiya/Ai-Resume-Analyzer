@@ -15,6 +15,8 @@ export interface AuthContextType {
   googleLogin: () => void;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  verifyEmail: (token: string) => Promise<AuthResponse>;
+  resendVerificationEmail: (email: string) => Promise<AuthResponse>;
 }
 
 export interface LoginFormData extends LoginData {
@@ -36,7 +38,6 @@ export interface AuthFormErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
-  firstName?: string;
-  lastName?: string;
+  name?: string;
   general?: string;
 }
