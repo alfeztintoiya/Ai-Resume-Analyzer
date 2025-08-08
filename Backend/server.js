@@ -3,6 +3,7 @@ const passport = require("passport");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
 const supabase = require("./utils/supabaseClient");
 require("dotenv").config();
 require("./config/passport");
@@ -26,7 +27,9 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 app.use(
   session({
@@ -40,6 +43,7 @@ app.use(passport.session());
 
 //Routes Import
 const auth = require("./routes/auth");
+const resume = require("./routes/resume");
 
 app.get("/", async (req, res) => {
   const { data, error } = await supabase.from("users").select("*");
@@ -52,6 +56,31 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/api/v1/auth", auth);
+app.use("/api/v1/resume", resume);
+
+app.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        success: false,
+        message: "File size too large. Maximum size is 10MB.",
+      });
+    }
+  }
+
+  if (error.message.includes("Invalid file type")) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
+  console.error("Global error handler:", error);
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Server listening at ${PORT}....`);

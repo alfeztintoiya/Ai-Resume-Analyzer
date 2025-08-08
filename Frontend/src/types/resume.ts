@@ -1,48 +1,59 @@
+// Add these to your types/resume.ts
 export interface Resume {
   id: string;
   userId: string;
   fileName: string;
   originalName: string;
-  fileUrl: string;
   fileSize: number;
+  filePath: string;
   mimeType: string;
-  status: ResumeStatus;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export const ResumeStatus = {
-  PENDING: 'PENDING',
-  PROCESSING: 'PROCESSING',
-  COMPLETED: 'COMPLETED',
-  FAILED: 'FAILED'
-} as const;
-
-export type ResumeStatus = typeof ResumeStatus[keyof typeof ResumeStatus];
-
-export interface ResumeAnalysis {
-  id: string;
-  resumeId: string;
-  score: number;
-  feedback: string;
-  suggestions: string[];
+  companyName: string;      // Required field
+  jobTitle: string;         // Required field  
+  jobDescription: string;   // Required field
+  overallScore?: number;
+  analysisStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  analysisData?: any;
+  contactScore?: number;
+  summaryScore?: number;
+  experienceScore?: number;
+  educationScore?: number;
+  skillsScore?: number;
+  jobMatchScore?: number;
   strengths: string[];
-  weaknesses: string[];
-  skillsFound: string[];
-  missingSkills: string[];
-  createdAt: string;
+  improvements: string[];
+  keywords: string[];
+  processedAt?: Date;
+  errorMessage?: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface ResumeUploadData {
+export interface ResumeAnalysisRequest {
   file: File;
-  description?: string;
+  companyName: string;
+  jobTitle: string;
+  jobDescription: string;
 }
 
-export interface ResumeListItem {
-  id: string;
-  fileName: string;
-  originalName: string;
-  status: ResumeStatus;
-  score?: number;
-  createdAt: string;
+export interface ResumeAnalysisResponse {
+  resumeId: string;
+  analysisResult: {
+    score: number;
+    strengths: string[];
+    improvements: string[];
+    keywords: string[];
+    sections: {
+      contact: number;
+      summary: number;
+      experience: number;
+      education: number;
+      skills: number;
+    };
+    jobAnalysis: {
+      companyName: string;
+      jobTitle: string;
+      jobDescription: string;
+      matchScore: number;
+    };
+  };
 }

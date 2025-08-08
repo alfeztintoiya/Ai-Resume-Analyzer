@@ -3,7 +3,9 @@ import { Upload, FileText, BarChart3, Users, Shield, CheckCircle, AlertCircle, T
 import './LandingPage.css';
 import Navbar from '../components/Navbar';
 import AuthModal from '../components/AuthModal';
+import UploadProgress from '../components/UploadProgress';
 import { useAuth } from '../contexts/AuthContext';
+import { resumeService } from '../services/resumeService';
 
 interface FilePreviewProps {
   file: File;
@@ -80,13 +82,19 @@ const LandingPage = () => {
   const { isAuthenticated } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'signup'>('login');
   const [companyName, setCompanyName] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [jobDescription, setJobDescription] = useState('');
+  
+  // Upload states
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'processing' | 'completed' | 'error'>('idle');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Intersection Observer for scroll animations
@@ -146,7 +154,7 @@ const LandingPage = () => {
     setIsDragging(false);
   };
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!selectedFile) return;
     
     // Validate that all required fields are filled
@@ -154,31 +162,82 @@ const LandingPage = () => {
       alert('Please fill in all fields: Company Name, Job Title, and Job Description');
       return;
     }
-    
-    setIsAnalyzing(true);
-    // Simulate analysis with job details
-    setTimeout(() => {
-      setAnalysisResult({
-        score: 85,
-        strengths: ['Strong technical skills', 'Relevant experience', 'Good education background'],
-        improvements: ['Add more quantifiable achievements', 'Include relevant keywords', 'Improve formatting'],
-        keywords: ['React', 'TypeScript', 'Node.js', 'AWS', 'Agile'],
-        sections: {
-          contact: 90,
-          summary: 80,
-          experience: 85,
-          education: 88,
-          skills: 82
-        },
-        jobAnalysis: {
-          companyName,
-          jobTitle,
-          jobDescription: jobDescription.substring(0, 100) + '...',
-          matchScore: 78
+
+    try {
+      // Reset states
+      setUploadError(null);
+      setUploadStatus('uploading');
+      setUploadProgress(0);
+      setAnalysisResult(null);
+
+      // Upload the resume
+      const uploadResponse = await resumeService.uploadResume(
+        selectedFile,
+        companyName.trim(),
+        jobTitle.trim(),
+        jobDescription.trim(),
+        (progress) => {
+          setUploadProgress(progress);
         }
-      });
-      setIsAnalyzing(false);
-    }, 3000);
+      );
+
+      if (uploadResponse.success && uploadResponse.resumeId) {
+        setCurrentResumeId(uploadResponse.resumeId);
+        setUploadStatus('processing');
+        setUploadProgress(100);
+
+        // Start polling for analysis results
+        try {
+          const analysisResponse = await resumeService.pollAnalysisStatus(
+            uploadResponse.resumeId,
+            (status) => {
+              if (status === 'PROCESSING') {
+                setUploadStatus('processing');
+              }
+            }
+          );
+
+          if (analysisResponse.success && analysisResponse.resume) {
+            const resume = analysisResponse.resume;
+            
+            // Transform backend response to match frontend expectations
+            setAnalysisResult({
+              score: resume.overallScore || 0,
+              strengths: resume.jobAnalysis?.strengths || [],
+              improvements: resume.jobAnalysis?.improvements || [],
+              keywords: resume.jobAnalysis?.keywords || [],
+              sections: {
+                contact: resume.sections?.contact || 0,
+                summary: resume.sections?.summary || 0,
+                experience: resume.sections?.experience || 0,
+                education: resume.sections?.education || 0,
+                skills: resume.sections?.skills || 0
+              },
+              jobAnalysis: {
+                companyName: resume.companyName,
+                jobTitle: resume.jobTitle,
+                jobDescription: resume.jobDescription.substring(0, 100) + '...',
+                matchScore: resume.jobAnalysis?.matchScore || 0
+              }
+            });
+
+            setUploadStatus('completed');
+          } else {
+            throw new Error('Analysis failed - no results received');
+          }
+        } catch (analysisError) {
+          console.error('Analysis polling error:', analysisError);
+          setUploadStatus('error');
+          setUploadError(analysisError instanceof Error ? analysisError.message : 'Analysis failed');
+        }
+      } else {
+        throw new Error(uploadResponse.message || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadStatus('error');
+      setUploadError(error instanceof Error ? error.message : 'Upload failed');
+    }
   };
 
   const handleRemoveFile = () => {
@@ -187,9 +246,23 @@ const LandingPage = () => {
     setCompanyName('');
     setJobTitle('');
     setJobDescription('');
+    
+    // Reset upload states
+    setUploadProgress(0);
+    setUploadStatus('idle');
+    setUploadError(null);
+    setCurrentResumeId(null);
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+  };
+
+  const handleRetryUpload = () => {
+    setUploadStatus('idle');
+    setUploadError(null);
+    setUploadProgress(0);
+    handleAnalyze();
   };
 
   const openFileDialog = () => {
@@ -334,7 +407,7 @@ const LandingPage = () => {
                 <div>
                   <FilePreview file={selectedFile} onRemove={handleRemoveFile} />
                   
-                  {!analysisResult && !isAnalyzing && (
+                  {!analysisResult && (uploadStatus === 'idle' || uploadStatus === 'error') && (
                     <div className="job-details-form">
                       <h3 className="job-details-title">Job Details</h3>
                       <p className="job-details-description">
@@ -394,7 +467,11 @@ const LandingPage = () => {
                       <button
                         onClick={handleAnalyze}
                         className="analyze-btn"
-                        disabled={!companyName.trim() || !jobTitle.trim() || !jobDescription.trim()}
+                        disabled={
+                          !companyName.trim() || 
+                          !jobTitle.trim() || 
+                          !jobDescription.trim()
+                        }
                       >
                         <BarChart3 className="w-5 h-5" />
                         Analyze Resume
@@ -402,11 +479,14 @@ const LandingPage = () => {
                     </div>
                   )}
 
-                  {isAnalyzing && (
-                    <div className="loading-container">
-                      <div className="loading-spinner"></div>
-                      <p className="loading-text">Analyzing your resume and job match...</p>
-                    </div>
+                  {(uploadStatus === 'uploading' || uploadStatus === 'processing' || uploadStatus === 'error') && (
+                    <UploadProgress
+                      progress={uploadProgress}
+                      status={uploadStatus === 'error' ? 'error' : uploadStatus}
+                      message={uploadError || undefined}
+                      fileName={selectedFile?.name}
+                      onRetry={uploadStatus === 'error' ? handleRetryUpload : undefined}
+                    />
                   )}
 
                   {analysisResult && (

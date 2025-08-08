@@ -11,30 +11,84 @@ datasource db {
 }
 
 model User {
-  id                      String    @id @default(cuid())
-  email                   String    @unique
-  password                String?
-  name                    String?   @map("name")
-  username                String?   @unique
-  profilePic              String?   @map("profile_pic")
-  phone                   String?
-  dateOfBirth             DateTime? @map("date_of_birth")
-  isVerified              Boolean   @default(false) @map("is_verified")
-  verificationToken       String?   @map("verification_token")
-  verificationTokenExpiry DateTime? @map("verification_token_expiry")
-  role                    UserRole  @default(USER)
-  createdAt               DateTime  @default(now()) @map("created_at")
-  updatedAt               DateTime  @updatedAt @map("updated_at")
+  id               String   @id @default(cuid())
+  email            String   @unique
+  password         String   // Keep required - use 'GOOGLE_OAUTH' for Google users
+  name             String   // Single name field
+  username         String?  @unique
+  profilePic       String?  @map("profile_pic")
+  phone            String?
+  dateOfBirth      DateTime? @map("date_of_birth")
+  isVerified       Boolean  @default(false) @map("is_verified")
+  role             UserRole @default(USER)
+  authProvider     String?  @map("auth_provider") @default("local")
+  verificationToken String? @map("verification_token")
+  verificationExpires DateTime? @map("verification_expires")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
 
-  // Relations for future tables
-  // resumes     Resume[]
-  // analyses    Analysis[]
+  // Relations
+  resumes          Resume[]
 
   @@map("users")
+}
+
+model Resume {
+  id               String   @id @default(cuid())
+  userId           String   @map("user_id")
+  fileName         String   @map("file_name")
+  originalName     String   @map("original_name")
+  fileSize         Int      @map("file_size") // in bytes
+  filePath         String   @map("file_path")
+  mimeType         String   @map("mime_type")
+  
+  // Job Analysis Fields
+  companyName      String   @map("company_name")
+  jobTitle         String   @map("job_title") 
+  jobDescription   String   @map("job_description")
+  
+  // Analysis Results
+  overallScore     Int?     @map("overall_score") // 0-100
+  analysisStatus   AnalysisStatus @default(PENDING) @map("analysis_status")
+  analysisData     Json?    @map("analysis_data") // Store complete analysis as JSON
+  
+  // Section Scores
+  contactScore     Int?     @map("contact_score")
+  summaryScore     Int?     @map("summary_score")
+  experienceScore  Int?     @map("experience_score")
+  educationScore   Int?     @map("education_score")
+  skillsScore      Int?     @map("skills_score")
+  
+  // Job Match Analysis
+  jobMatchScore    Int?     @map("job_match_score") // 0-100
+  strengths        String[] @map("strengths")
+  improvements     String[] @map("improvements")
+  keywords         String[] @map("keywords")
+  
+  // Metadata
+  processedAt      DateTime? @map("processed_at")
+  errorMessage     String?   @map("error_message")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("resumes")
+  @@index([userId])
+  @@index([analysisStatus])
+  @@index([createdAt])
 }
 
 enum UserRole {
   USER
   ADMIN
   PREMIUM
+}
+
+enum AnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
 }
