@@ -27,14 +27,23 @@ router.get(
     session: false,
   }),
   (req, res) => {
-    const token = jwt.sign(req.user, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      {
+        userId: req.user.id,
+        email: req.user.email,
+        role: req.user.role || "USER",
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
-      sameSite: "Lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.redirect("http://localhost:5173");

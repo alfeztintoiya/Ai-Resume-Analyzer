@@ -69,7 +69,7 @@ const uploadResume = async (req, res) => {
             const {data: user, error: userError } = await supabase
                                                     .from('users')
                                                     .select('*')
-                                                    .eq('id',decoded.userId)
+                                                    .eq('email',decoded.email)
                                                     .single();
 
             if(userError || !user){

@@ -1,10 +1,11 @@
-const multer = require("multer");
-const { v2: cloudinary } = require("cloudinary");
-const jwt = require("jsonwebtoken");
-const supabase = require("../utils/supabaseClient");
-const { randomUUID } = require("crypto");
+const multer = require('multer');
+const { v2: cloudinary } = require('cloudinary');
+const jwt = require('jsonwebtoken');
+const supabase = require('../utils/supabaseClient');
+const geminiService = require('../services/geminiService');
+const { randomUUID } = require('crypto');
 
-// Configure multer for file upload (memory storage for Cloudinary)
+// Configure multer for memory storage
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,
@@ -12,35 +13,29 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    // Accept PDF, DOC, DOCX files
     const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
     ];
-
+    
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(
-        new Error(
-          "Invalid file type. Only PDF, DOC, and DOCX files are allowed."
-        ),
-        false
-      );
+      cb(new Error('Invalid file type. Only PDF, DOC, and DOCX files are allowed.'), false);
     }
-  },
+  }
 });
 
-// Upload and analyze resume
+// Upload resume and start AI analysis
 const uploadResume = async (req, res) => {
   try {
-    // Verify user authentication
+    // Authentication check
     const token = req.cookies.token;
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Authentication required",
+        message: 'Authentication required'
       });
     }
 
@@ -50,57 +45,58 @@ const uploadResume = async (req, res) => {
     } catch (error) {
       return res.status(401).json({
         success: false,
-        message: "Invalid authentication token",
+        message: 'Invalid authentication token'
       });
     }
 
-    // Validate required fields
+    // Validate input
     const { companyName, jobTitle, jobDescription } = req.body;
-
+    
     if (!companyName || !jobTitle || !jobDescription) {
       return res.status(400).json({
         success: false,
-        message: "Company name, job title, and job description are required",
+        message: 'Company name, job title, and job description are required'
       });
     }
 
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: "Resume file is required",
+        message: 'Resume file is required'
       });
     }
 
-    // Verify user exists and is verified
+    // Verify user
+    const userId = decoded.userId || decoded.id;
     const { data: user, error: userError } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", decoded.userId)
+      .from('users')
+      .select('*')
+      .eq('id', userId)
       .single();
 
     if (userError || !user) {
       return res.status(401).json({
         success: false,
-        message: "User not found",
+        message: 'User not found'
       });
     }
 
     if (!user.is_verified) {
       return res.status(401).json({
         success: false,
-        message: "Please verify your email address first",
+        message: 'Please verify your email address first'
       });
     }
 
-    // Upload file to Cloudinary
+    // Upload to Cloudinary
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          resource_type: "raw", // For non-image files
-          folder: "resumes",
+          resource_type: 'raw',
+          folder: 'resumes',
           use_filename: true,
           unique_filename: true,
-          access_mode: "authenticated",
+          access_mode: 'public'
         },
         (error, result) => {
           if (error) {
@@ -110,80 +106,156 @@ const uploadResume = async (req, res) => {
           }
         }
       );
-
+      
       uploadStream.end(req.file.buffer);
     });
 
-    // Generate unique resume ID
+    // Save to database
     const resumeId = randomUUID();
-
-    // Save resume data to database
     const { data: newResume, error: insertError } = await supabase
-      .from("resumes")
-      .insert([
-        {
-          id: resumeId,
-          user_id: decoded.userId,
-          file_name: uploadResult.public_id,
-          original_name: req.file.originalname,
-          file_size: req.file.size,
-          file_path: uploadResult.secure_url,
-          mime_type: req.file.mimetype,
-          company_name: companyName,
-          job_title: jobTitle,
-          job_description: jobDescription,
-          analysis_status: "PENDING",
-          strengths: [],
-          improvements: [],
-          keywords: [],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ])
+      .from('resumes')
+      .insert([{
+        id: resumeId,
+        user_id: userId,
+        file_name: uploadResult.public_id,
+        original_name: req.file.originalname,
+        file_size: req.file.size,
+        file_path: uploadResult.secure_url,
+        mime_type: req.file.mimetype,
+        company_name: companyName,
+        job_title: jobTitle,
+        job_description: jobDescription,
+        analysis_status: 'PENDING',
+        strengths: [],
+        improvements: [],
+        keywords: [],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }])
       .select()
       .single();
 
     if (insertError) {
-      console.error("Resume insertion error:", insertError);
-
-      // Clean up uploaded file if database insertion fails
+      console.error('Resume insertion error:', insertError);
+      
+      // Cleanup uploaded file
       try {
-        await cloudinary.uploader.destroy(uploadResult.public_id, {
-          resource_type: "raw",
-        });
+        await cloudinary.uploader.destroy(uploadResult.public_id, { resource_type: 'raw' });
       } catch (cleanupError) {
-        console.error("File cleanup error:", cleanupError);
+        console.error('File cleanup error:', cleanupError);
       }
-
+      
       return res.status(500).json({
         success: false,
-        message: "Failed to save resume data",
+        message: 'Failed to save resume data'
       });
     }
 
-    // Start background analysis (simulate for now)
-    // In production, this would trigger an AI service or queue job
+    // Start AI analysis in background
     setTimeout(async () => {
-      await simulateResumeAnalysis(resumeId);
-    }, 2000);
+      await analyzeResumeWithAI(
+        resumeId, 
+        uploadResult.secure_url, 
+        req.file.mimetype,
+        companyName, 
+        jobTitle, 
+        jobDescription
+      );
+    }, 1000);
 
     res.status(201).json({
       success: true,
-      message: "Resume uploaded successfully. Analysis in progress...",
+      message: 'Resume uploaded successfully. AI analysis in progress...',
       resumeId: newResume.id,
       fileName: newResume.original_name,
-      analysisStatus: "PENDING",
+      analysisStatus: 'PENDING'
     });
+
   } catch (error) {
-    console.error("Resume upload error:", error);
+    console.error('Resume upload error:', error);
     res.status(500).json({
       success: false,
-      message: "Internal server error during file upload",
+      message: 'Internal server error during file upload'
     });
   }
 };
 
-// Get resume analysis status and results
+// AI Analysis function
+const analyzeResumeWithAI = async (resumeId, fileUrl, mimeType, companyName, jobTitle, jobDescription) => {
+  try {
+    console.log(`🚀 Starting AI analysis for resume ${resumeId}...`);
+    
+    // Update status to PROCESSING
+    await supabase
+      .from('resumes')
+      .update({
+        analysis_status: 'PROCESSING',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', resumeId);
+
+    // 🤖 CALL GEMINI AI TO ANALYZE PDF
+    const analysis = await geminiService.analyzeResume(
+      fileUrl, 
+      mimeType, 
+      jobTitle, 
+      jobDescription, 
+      companyName
+    );
+    
+    console.log('✅ AI analysis completed successfully');
+
+    // Calculate job match score
+    const jobMatchScore = Math.round(
+      (analysis.sections.contact + analysis.sections.summary + 
+       analysis.sections.experience + analysis.sections.education + 
+       analysis.sections.skills) / 5
+    );
+
+    // Save analysis results
+    const { error: updateError } = await supabase
+      .from('resumes')
+      .update({
+        analysis_status: 'COMPLETED',
+        overall_score: analysis.overallScore,
+        contact_score: analysis.sections.contact,
+        summary_score: analysis.sections.summary,
+        experience_score: analysis.sections.experience,
+        education_score: analysis.sections.education,
+        skills_score: analysis.sections.skills,
+        job_match_score: jobMatchScore,
+        strengths: analysis.strengths,
+        improvements: analysis.improvements,
+        keywords: analysis.keywords,
+        analysis_data: analysis.rawAnalysis,
+        processed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', resumeId);
+
+    if (updateError) {
+      console.error('❌ Analysis update error:', updateError);
+      throw new Error('Failed to save analysis results');
+    }
+
+    console.log(`✅ AI analysis completed and saved for resume ${resumeId}`);
+
+  } catch (error) {
+    console.error('❌ AI analysis error:', error);
+    
+    // Mark as failed
+    await supabase
+      .from('resumes')
+      .update({
+        analysis_status: 'FAILED',
+        error_message: error.message,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', resumeId);
+  }
+};
+
+// Get resume analysis
 const getResumeAnalysis = async (req, res) => {
   try {
     const { resumeId } = req.params;
@@ -192,24 +264,24 @@ const getResumeAnalysis = async (req, res) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Authentication required",
+        message: 'Authentication required'
       });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId || decoded.id;
 
-    // Get resume data
     const { data: resume, error: resumeError } = await supabase
-      .from("resumes")
-      .select("*")
-      .eq("id", resumeId)
-      .eq("user_id", decoded.userId)
+      .from('resumes')
+      .select('*')
+      .eq('id', resumeId)
+      .eq('user_id', userId)
       .single();
 
     if (resumeError || !resume) {
       return res.status(404).json({
         success: false,
-        message: "Resume not found",
+        message: 'Resume not found'
       });
     }
 
@@ -228,29 +300,31 @@ const getResumeAnalysis = async (req, res) => {
           summary: resume.summary_score,
           experience: resume.experience_score,
           education: resume.education_score,
-          skills: resume.skills_score,
+          skills: resume.skills_score
         },
         jobAnalysis: {
           matchScore: resume.job_match_score,
           strengths: resume.strengths,
           improvements: resume.improvements,
-          keywords: resume.keywords,
+          keywords: resume.keywords
         },
         analysisData: resume.analysis_data,
         processedAt: resume.processed_at,
         createdAt: resume.created_at,
-      },
+        errorMessage: resume.error_message
+      }
     });
+
   } catch (error) {
-    console.error("Get resume analysis error:", error);
+    console.error('Get resume analysis error:', error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: 'Internal server error'
     });
   }
 };
 
-// Get user's resume history
+// Get user resumes
 const getUserResumes = async (req, res) => {
   try {
     const token = req.cookies.token;
@@ -258,27 +332,28 @@ const getUserResumes = async (req, res) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Authentication required",
+        message: 'Authentication required'
       });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId || decoded.id;
 
     const { data: resumes, error: resumesError } = await supabase
-      .from("resumes")
-      .select("*")
-      .eq("user_id", decoded.userId)
-      .order("created_at", { ascending: false });
+      .from('resumes')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
 
     if (resumesError) {
-      console.error("Get user resumes error:", resumesError);
+      console.error('Get user resumes error:', resumesError);
       return res.status(500).json({
         success: false,
-        message: "Failed to fetch resumes",
+        message: 'Failed to fetch resumes'
       });
     }
 
-    const formattedResumes = resumes.map((resume) => ({
+    const formattedResumes = resumes.map(resume => ({
       id: resume.id,
       fileName: resume.original_name,
       companyName: resume.company_name,
@@ -287,19 +362,20 @@ const getUserResumes = async (req, res) => {
       overallScore: resume.overall_score,
       jobMatchScore: resume.job_match_score,
       createdAt: resume.created_at,
-      processedAt: resume.processed_at,
+      processedAt: resume.processed_at
     }));
 
     res.status(200).json({
       success: true,
       resumes: formattedResumes,
-      total: resumes.length,
+      total: resumes.length
     });
+
   } catch (error) {
-    console.error("Get user resumes error:", error);
+    console.error('Get user resumes error:', error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: 'Internal server error'
     });
   }
 };
@@ -313,161 +389,59 @@ const deleteResume = async (req, res) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Authentication required",
+        message: 'Authentication required'
       });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.userId || decoded.id;
 
-    // Get resume to verify ownership and get file details
     const { data: resume, error: resumeError } = await supabase
-      .from("resumes")
-      .select("*")
-      .eq("id", resumeId)
-      .eq("user_id", decoded.userId)
+      .from('resumes')
+      .select('*')
+      .eq('id', resumeId)
+      .eq('user_id', userId)
       .single();
 
     if (resumeError || !resume) {
       return res.status(404).json({
         success: false,
-        message: "Resume not found",
+        message: 'Resume not found'
       });
     }
 
-    // Delete from database first
     const { error: deleteError } = await supabase
-      .from("resumes")
+      .from('resumes')
       .delete()
-      .eq("id", resumeId)
-      .eq("user_id", decoded.userId);
+      .eq('id', resumeId)
+      .eq('user_id', userId);
 
     if (deleteError) {
-      console.error("Resume deletion error:", deleteError);
+      console.error('Resume deletion error:', deleteError);
       return res.status(500).json({
         success: false,
-        message: "Failed to delete resume",
+        message: 'Failed to delete resume'
       });
     }
 
-    // Delete file from Cloudinary
+    // Delete from Cloudinary
     try {
-      await cloudinary.uploader.destroy(resume.file_name, {
-        resource_type: "raw",
-      });
+      await cloudinary.uploader.destroy(resume.file_name, { resource_type: 'raw' });
     } catch (cloudinaryError) {
-      console.error("Cloudinary deletion error:", cloudinaryError);
-      // Continue even if file deletion fails
+      console.error('Cloudinary deletion error:', cloudinaryError);
     }
 
     res.status(200).json({
       success: true,
-      message: "Resume deleted successfully",
+      message: 'Resume deleted successfully'
     });
+
   } catch (error) {
-    console.error("Delete resume error:", error);
+    console.error('Delete resume error:', error);
     res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: 'Internal server error'
     });
-  }
-};
-
-// Simulate resume analysis (replace with actual AI service)
-const simulateResumeAnalysis = async (resumeId) => {
-  try {
-    // Update status to PROCESSING
-    await supabase
-      .from("resumes")
-      .update({
-        analysis_status: "PROCESSING",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", resumeId);
-
-    // Simulate analysis time (2-5 seconds)
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 3000 + 2000)
-    );
-
-    // Generate mock analysis results
-    const mockAnalysis = {
-      overallScore: Math.floor(Math.random() * 40) + 60, // 60-100
-      contactScore: Math.floor(Math.random() * 30) + 70,
-      summaryScore: Math.floor(Math.random() * 40) + 60,
-      experienceScore: Math.floor(Math.random() * 35) + 65,
-      educationScore: Math.floor(Math.random() * 25) + 75,
-      skillsScore: Math.floor(Math.random() * 30) + 70,
-      jobMatchScore: Math.floor(Math.random() * 35) + 65,
-      strengths: [
-        "Strong technical skills alignment",
-        "Relevant work experience",
-        "Good educational background",
-        "Clear resume structure",
-      ],
-      improvements: [
-        "Add more quantifiable achievements",
-        "Include relevant keywords from job description",
-        "Improve summary section",
-        "Add more specific skills",
-      ],
-      keywords: [
-        "JavaScript",
-        "React",
-        "Node.js",
-        "MongoDB",
-        "API Development",
-        "Agile",
-        "Git",
-        "AWS",
-      ],
-    };
-
-    // Update resume with analysis results
-    const { error: updateError } = await supabase
-      .from("resumes")
-      .update({
-        analysis_status: "COMPLETED",
-        overall_score: mockAnalysis.overallScore,
-        contact_score: mockAnalysis.contactScore,
-        summary_score: mockAnalysis.summaryScore,
-        experience_score: mockAnalysis.experienceScore,
-        education_score: mockAnalysis.educationScore,
-        skills_score: mockAnalysis.skillsScore,
-        job_match_score: mockAnalysis.jobMatchScore,
-        strengths: mockAnalysis.strengths,
-        improvements: mockAnalysis.improvements,
-        keywords: mockAnalysis.keywords,
-        analysis_data: mockAnalysis,
-        processed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", resumeId);
-
-    if (updateError) {
-      console.error("Analysis update error:", updateError);
-
-      // Mark as failed
-      await supabase
-        .from("resumes")
-        .update({
-          analysis_status: "FAILED",
-          error_message: "Analysis processing failed",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", resumeId);
-    }
-  } catch (error) {
-    console.error("Analysis simulation error:", error);
-
-    // Mark as failed
-    await supabase
-      .from("resumes")
-      .update({
-        analysis_status: "FAILED",
-        error_message: error.message,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", resumeId);
   }
 };
 
@@ -476,5 +450,5 @@ module.exports = {
   uploadResume,
   getResumeAnalysis,
   getUserResumes,
-  deleteResume,
+  deleteResume
 };

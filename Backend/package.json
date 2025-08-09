@@ -12,6 +12,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.13.0",
     "@supabase/supabase-js": "^2.53.0",
     "bcrypt": "^6.0.0",
