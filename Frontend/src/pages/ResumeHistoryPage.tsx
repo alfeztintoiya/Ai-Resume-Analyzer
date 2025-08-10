@@ -1,6 +1,3 @@
-// Frontend/src/pages/ResumeHistoryPage.tsx
-// filepath: /Volumes/MY  DISK/Web_Development_Project/FullStack Projects/Resume_Analyzer/Frontend/src/pages/ResumeHistoryPage.tsx
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
