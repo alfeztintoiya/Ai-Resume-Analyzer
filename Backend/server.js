@@ -9,7 +9,7 @@ require("dotenv").config();
 require("./config/passport");
 
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5003;
 
 // Cloudinary Configuration
 cloudinary.config({
@@ -23,7 +23,7 @@ cloudinary.config({
 const cors = require("cors");
 app.use(
   cors({
-    origin: "https://resumind-drab.vercel.app",
+    origin: "https://resumind-drab.vercel.app" || "http://localhost:5173",
     credentials: true,
   })
 );
