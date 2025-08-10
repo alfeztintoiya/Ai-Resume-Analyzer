@@ -2,7 +2,7 @@
 
 > Transform your job search with intelligent resume analysis powered by advanced AI technology
 
-[![Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://your-demo-link.com)
+
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
 
