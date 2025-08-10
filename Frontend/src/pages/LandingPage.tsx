@@ -607,56 +607,72 @@ const LandingPage = () => {
       </section>
 
       
-
-      {/* Footer */}
-      <footer className="footer">
-        <div className="container">
-          <div className="footer-container">
-            <div className="footer-grid">
-              <div className="footer-brand">
-                <div className="footer-logo">
-                  <div className="footer-logo-icon">
-                    <BarChart3 className="w-5 h-5" />
+    <footer className="footer">
+            <div className="container">
+              <div className="footer-container">
+                <div className="footer-main">
+                  <div className="footer-brand">
+                    <div className="footer-logo">
+                      <FileText className="w-6 h-6" />
+                      <span>Resume Analyzer</span>
+                    </div>
+                    <p className="footer-tagline">
+                      Professional resume analysis powered by AI technology.
+                    </p>
+                    <div className="footer-stats">
+                      <div className="stat-item">
+                        <span className="stat-number">10K+</span>
+                        <span className="stat-label">Resumes Analyzed</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-number">95%</span>
+                        <span className="stat-label">Success Rate</span>
+                      </div>
+                    </div>
                   </div>
-                  <span className="footer-logo-text">ResumeAI</span>
+
+                  <div className="footer-links-section">
+                <div className="footer-column">
+                  <h4>Platform</h4>
+                  <ul>
+                    <li><button onClick={scrollToUploadSection}>Upload Resume</button></li>
+                    <li><button onClick={handleSignUpClick}>Create Account</button></li>
+                    <li><a href="/history">My Analysis</a></li>
+                  </ul>
                 </div>
-                <p className="footer-description">
-                  AI-powered resume analysis to help you land your dream job.
-                </p>
-              </div>
-              
-              <div className="footer-section">
-                <h3 className="footer-section-title">Product</h3>
-                <div className="footer-links">
-                  <a href="#" className="footer-link">Features</a>
-                  <a href="#" className="footer-link">Pricing</a>
-                  <a href="#" className="footer-link">API</a>
+
+                <div className="footer-column">
+                  <h4>Resources</h4>
+                  <ul>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                  </ul>
                 </div>
-              </div>
-              
-              <div className="footer-section">
-                <h3 className="footer-section-title">Company</h3>
-                <div className="footer-links">
-                  <a href="#" className="footer-link">About</a>
-                  <a href="#" className="footer-link">Blog</a>
-                  <a href="#" className="footer-link">Careers</a>
-                </div>
-              </div>
-              
-              <div className="footer-section">
-                <h3 className="footer-section-title">Support</h3>
-                <div className="footer-links">
-                  <a href="#" className="footer-link">Help Center</a>
-                  <a href="#" className="footer-link">Contact</a>
-                  <a href="#" className="footer-link">Privacy</a>
+
+                <div className="footer-column">
+                  <h4>Legal</h4>
+                  <ul>
+                    <li><a href="/privacy">Privacy Policy</a></li>
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/security">Security</a></li>
+                  </ul>
                 </div>
               </div>
             </div>
-            
+
             <div className="footer-bottom">
-              <p className="footer-copyright">
-                © 2024 ResumeAI. All rights reserved.
-              </p>
+              <div className="footer-bottom-left">
+                <p>&copy; 2024 Resume Analyzer. Built with React & Node.js</p>
+              </div>
+              <div className="footer-bottom-right">
+                <div className="tech-stack">
+                  <span className="tech-item">React</span>
+                  <span className="tech-item">TypeScript</span>
+                  <span className="tech-item">Node.js</span>
+                  <span className="tech-item">AI/ML</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

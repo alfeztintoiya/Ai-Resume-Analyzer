@@ -32,7 +32,7 @@ class EmailService {
 
       const mailOptions = {
         from: {
-          name: "ResumeAI",
+          name: "Resumind",
           address: process.env.EMAIL_USER,
         },
         to: userEmail,
