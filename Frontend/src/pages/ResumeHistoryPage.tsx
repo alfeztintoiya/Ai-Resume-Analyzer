@@ -3,10 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { 
   FileText, 
   Calendar, 
-  Clock, 
-  TrendingUp, 
+  Clock,  
   Eye,
-  ArrowLeft,
   Search,
   Filter
 } from 'lucide-react';

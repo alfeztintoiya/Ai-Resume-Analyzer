@@ -5,7 +5,6 @@ import { getUserFullName } from '../utils/userUtils';
 import Avatar from './Avatar';
 import type { NavbarProps } from '../types';
 import './Navbar.css';
-import { Link } from 'react-router-dom';
 
 const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
   const { user, isAuthenticated, logout } = useAuth();

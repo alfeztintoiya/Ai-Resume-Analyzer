@@ -53,31 +53,31 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description }) =
   );
 };
 
-interface StatCardProps {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-  change: string;
-  positive: boolean;
-}
+// interface StatCardProps {
+//   icon: React.ReactNode;
+//   value: string;
+//   label: string;
+//   change: string;
+//   positive: boolean;
+// }
 
-const StatCard: React.FC<StatCardProps> = ({ icon, value, label, change, positive }) => {
-  return (
-    <div className="stat-card">
-      <div className="stat-card-header">
-        <div className="stat-card-icon">
-          {icon}
-        </div>
-        <div className={`stat-card-change ${positive ? 'positive' : 'negative'}`}>
-          <TrendingUp className="w-4 h-4" />
-          {change}
-        </div>
-      </div>
-      <div className="stat-card-value">{value}</div>
-      <div className="stat-card-label">{label}</div>
-    </div>
-  );
-};
+// const StatCard: React.FC<StatCardProps> = ({ icon, value, label, change, positive }) => {
+//   return (
+//     <div className="stat-card">
+//       <div className="stat-card-header">
+//         <div className="stat-card-icon">
+//           {icon}
+//         </div>
+//         <div className={`stat-card-change ${positive ? 'positive' : 'negative'}`}>
+//           <TrendingUp className="w-4 h-4" />
+//           {change}
+//         </div>
+//       </div>
+//       <div className="stat-card-value">{value}</div>
+//       <div className="stat-card-label">{label}</div>
+//     </div>
+//   );
+// };
 
 const LandingPage = () => {
   const { isAuthenticated } = useAuth();
@@ -94,7 +94,7 @@ const LandingPage = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'processing' | 'completed' | 'error'>('idle');
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
+  // const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -183,7 +183,7 @@ const LandingPage = () => {
       );
 
       if (uploadResponse.success && uploadResponse.resumeId) {
-        setCurrentResumeId(uploadResponse.resumeId);
+        // setCurrentResumeId(uploadResponse.resumeId);
         setUploadStatus('processing');
         setUploadProgress(100);
 
@@ -230,7 +230,7 @@ const LandingPage = () => {
     setUploadProgress(0);
     setUploadStatus('idle');
     setUploadError(null);
-    setCurrentResumeId(null);
+    // setCurrentResumeId(null);
     
     if (fileInputRef.current) {
       fileInputRef.current.value = '';

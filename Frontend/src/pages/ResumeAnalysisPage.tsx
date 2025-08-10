@@ -4,7 +4,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ChevronDown, 
   ChevronUp, 
-  ArrowLeft, 
   FileText,
   BarChart3,
   CheckCircle,
@@ -31,6 +30,7 @@ interface ResumeAnalysisData {
   jobTitle: string;
   jobDescription: string;
   overallScore: number;
+  analysisStatus?: string;
   sections: {
     contact: number;
     summary: number;
@@ -43,6 +43,37 @@ interface ResumeAnalysisData {
     strengths: string[];
     improvements: string[];
     keywords: string[];
+  };
+  resumeImageUrl?: string;
+  analysisData?: {
+    ATS?: AnalysisSection;
+    toneAndStyle?: AnalysisSection;
+    content?: AnalysisSection;
+    structure?: AnalysisSection;
+    skills?: AnalysisSection;
+  };
+}
+
+interface ApiResumeResponse {
+  id: string;
+  fileName: string;
+  companyName: string;
+  jobTitle: string;
+  jobDescription: string;
+  analysisStatus: string;
+  overallScore?: number;
+  sections?: {
+    contact?: number;
+    summary?: number;
+    experience?: number;
+    education?: number;
+    skills?: number;
+  };
+  jobAnalysis?: {
+    matchScore?: number;
+    strengths?: string[];
+    improvements?: string[];
+    keywords?: string[];
   };
   resumeImageUrl?: string;
   analysisData?: {
@@ -74,8 +105,37 @@ const ResumeAnalysisPage: React.FC = () => {
       setLoading(true);
       const response = await resumeService.getResumeAnalysis(resumeId!);
       
-      if (response.success) {
-        setAnalysisData(response.resume);
+      if (response.success && response.resume) {
+        // Transform API response to match our interface
+      const apiData: ApiResumeResponse = response.resume;
+      
+      // Create properly typed analysis data with defaults
+      const transformedData: ResumeAnalysisData = {
+        id: apiData.id,
+        fileName: apiData.fileName,
+        companyName: apiData.companyName,
+        jobTitle: apiData.jobTitle,
+        jobDescription: apiData.jobDescription,
+        analysisStatus: apiData.analysisStatus,
+        overallScore: apiData.overallScore ?? 0,
+        sections: {
+          contact: apiData.sections?.contact ?? 0,
+          summary: apiData.sections?.summary ?? 0,
+          experience: apiData.sections?.experience ?? 0,
+          education: apiData.sections?.education ?? 0,
+          skills: apiData.sections?.skills ?? 0,
+        },
+        jobAnalysis: {
+          matchScore: apiData.jobAnalysis?.matchScore ?? 0,
+          strengths: apiData.jobAnalysis?.strengths ?? [],
+          improvements: apiData.jobAnalysis?.improvements ?? [],
+          keywords: apiData.jobAnalysis?.keywords ?? [],
+        },
+        resumeImageUrl: apiData.resumeImageUrl,
+        analysisData: apiData.analysisData,
+      };
+      
+      setAnalysisData(transformedData);
       } else {
         setError('Failed to load analysis data');
       }

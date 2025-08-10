@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { X, Eye, EyeOff, } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import type { AuthModalProps } from '../types';
 import EmailVerificationNotice from './EmailVerificationNotice';
