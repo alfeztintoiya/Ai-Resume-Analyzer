@@ -7,7 +7,7 @@ class AuthService {
   // Google OAuth Login
   googleLogin = (): void => {
     // Redirect to backend Google OAuth endpoint
-    window.location.href = `${API_BASE_URL}/api/v1/auth/google`;
+    window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   // Get current user
