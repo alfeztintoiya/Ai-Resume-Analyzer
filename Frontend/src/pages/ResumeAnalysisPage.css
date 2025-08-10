@@ -1,0 +1,576 @@
+/* Frontend/src/pages/ResumeAnalysisPage.css */
+/* filepath: /Volumes/MY  DISK/Web_Development_Project/FullStack Projects/Resume_Analyzer/Frontend/src/pages/ResumeAnalysisPage.css */
+
+/* Page Base Styles */
+.analysis-page {
+  min-height: 100vh;
+  background-color: white;
+  color: #1a1a1a;
+}
+
+.analysis-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Header Styles */
+.analysis-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.analysis-title h1 {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.analysis-title p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Main Content Layout - 🔧 UPDATED: 40% left, 60% right */
+.analysis-content {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  gap: 32px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .analysis-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* Resume Preview Section */
+.resume-preview-section {
+  position: sticky;
+  top: 24px;
+}
+
+.resume-preview-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.resume-preview-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.resume-preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background-color: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  color: #6b7280;
+}
+
+.resume-preview-placeholder p {
+  margin-top: 16px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* Under Process Styles */
+.resume-preview-placeholder.under-process {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 2px dashed #cbd5e1;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.under-process-content h3 {
+  margin: 16px 0 8px 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.under-process-message {
+  margin: 8px 0 24px 0;
+  font-size: 16px;
+  color: #64748b;
+  font-style: italic;
+}
+
+.process-indicator {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+/* Loading Dots Animation */
+.loading-dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  animation: loadingDots 1.4s infinite ease-in-out both;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes loadingDots {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Analysis Details Section */
+.analysis-details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Score Cards */
+.score-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.score-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.score-content {
+  text-align: center;
+}
+
+.score-number {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.score-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.overall-score {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.ats-score {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+/* Analysis Sections */
+.analysis-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.analysis-section-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.analysis-section-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.section-header:hover {
+  background-color: #f9fafb;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.section-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-score {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Section Content - 🔧 IMPROVED: Better text structure */
+.section-content {
+  padding: 20px;
+  border-top: 1px solid #f3f4f6;
+  background-color: #fafbfc;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+/* Tips - 🔧 IMPROVED: Better typography and spacing */
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.tip-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border-left: 3px solid #e5e7eb;
+}
+
+.tip-item.good {
+  border-left-color: #10b981;
+  background-color: #f0fdf4;
+}
+
+.tip-item.improve {
+  border-left-color: #f59e0b;
+  background-color: #fffbeb;
+}
+
+.tip-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.tip-title {
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.tip-explanation {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: justify; /* 🔧 ADDED: Justified text */
+  hyphens: auto; /* 🔧 ADDED: Better word breaking */
+  word-wrap: break-word;
+}
+
+.tip-content {
+  flex: 1;
+}
+
+.no-tips {
+  padding: 24px 0;
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  background: white;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+/* Tips Grid - 🔧 IMPROVED: Better layout */
+.tips-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.tips-column.full-width {
+  grid-column: 1 / -1;
+}
+
+.tips-column {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.tips-heading {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.tips-column .tips-list {
+  margin-top: 0;
+  gap: 12px;
+}
+
+.tips-column .tip-item {
+  padding: 8px 12px;
+  margin: 0;
+  background: #f9fafb;
+  border-left: 2px solid #e5e7eb;
+}
+
+.tips-column .tip-item.good {
+  background-color: #f0fdf4;
+  border-left-color: #10b981;
+}
+
+.tips-column .tip-item.improve {
+  background-color: #fffbeb;
+  border-left-color: #f59e0b;
+}
+
+.tips-column .tip-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tips-column .tip-item span {
+  color: #374151;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: justify; /* 🔧 ADDED: Justified text */
+  flex: 1;
+}
+
+/* Keywords Section - 🔧 IMPROVED */
+.keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.keyword-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid #dbeafe;
+  transition: all 0.2s ease;
+}
+
+.keyword-tag:hover {
+  background-color: #dbeafe;
+  transform: translateY(-1px);
+}
+
+/* Loading and Error States */
+.analysis-loading,
+.analysis-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.back-btn {
+  margin-top: 16px;
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.back-btn:hover {
+  background-color: #2563eb;
+}
+
+/* Responsive Design - 🔧 IMPROVED */
+@media (max-width: 768px) {
+  .analysis-container {
+    padding: 16px;
+  }
+  
+  .analysis-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .score-number {
+    font-size: 36px;
+  }
+  
+  .tips-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .section-header {
+    padding: 12px 16px;
+  }
+  
+  .section-content {
+    padding: 16px;
+  }
+  
+  .under-process-content h3 {
+    font-size: 18px;
+  }
+  
+  .under-process-message {
+    font-size: 14px;
+  }
+  
+  .resume-preview-placeholder.under-process {
+    padding: 24px 16px;
+  }
+  
+  /* 🔧 ADDED: Mobile specific improvements */
+  .tip-explanation {
+    text-align: left; /* Better for mobile */
+  }
+  
+  .tips-column .tip-item span {
+    text-align: left; /* Better for mobile */
+  }
+}
+
+/* Minimal animations for better UX */
+.analysis-section-card {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.analysis-section-card:nth-child(1) { animation-delay: 0.1s; }
+.analysis-section-card:nth-child(2) { animation-delay: 0.2s; }
+.analysis-section-card:nth-child(3) { animation-delay: 0.3s; }
+.analysis-section-card:nth-child(4) { animation-delay: 0.4s; }
+.analysis-section-card:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.score-card {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

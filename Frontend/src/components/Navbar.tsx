@@ -35,12 +35,11 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
             <span className="logo-text">ResumeAI</span>
           </div>
           
-          <nav className="nav-desktop">
-            <a href="#features" className="nav-link">Features</a>
-            <a href="#how-it-works" className="nav-link">How it Works</a>
-            <a href="#pricing" className="nav-link">Pricing</a>
-            <a href="#about" className="nav-link">About</a>
-          </nav>
+          { isAuthenticated ? (
+            <nav className="nav-desktop">
+            <a href="/history" className="nav-link">My Analysis</a>
+            </nav>
+          ):null}
 
           <div className="header-buttons">
             {isAuthenticated ? (

@@ -1,22 +1,22 @@
 const { v2: cloudinary } = require('cloudinary');
 
-class CloudPDFToImageService{
-    constructor(){
-        if(!cloudinary.config().cloud_name){
+class CloudPDFToImageService {
+    constructor() {
+        if (!cloudinary.config().cloud_name) {
             throw new Error('Cloudinary configuration is required');
         }
     }
 
-    async converPDFToImage(pdfUrl,resumeId){
+    async convertPDFToImage(pdfUrl, resumeId) {
         try {
             console.log('🖼️ Converting PDF to image using Cloudinary transformation...');
             console.log('📄 PDF URL:', pdfUrl);
 
-            const publicId = this.extractPublicid(pdfUrl);
+            const publicId = this.extractPublicId(pdfUrl);
             console.log('🔍 Extracted public_id:', publicId);
 
-            const imageUrl = cloudinary.url(publicId,{
-                resource_type: 'image',
+            const imageUrl = cloudinary.url(publicId, {
+                resource_type: 'auto', // works for PDF uploads
                 format: 'png',
                 page: 1,
                 width: 800,
@@ -39,32 +39,33 @@ class CloudPDFToImageService{
         }
     }
 
-    extractPublicId(cloudinaryUrl){
+    extractPublicId(cloudinaryUrl) {
         try {
             const urlParts = cloudinaryUrl.split('/');
-
             const uploadIndex = urlParts.findIndex(part => part === 'upload');
-            if(uploadIndex === -1){
+            if (uploadIndex === -1) {
                 throw new Error('Invalid Cloudinary URL format');
             }
 
-            const pathAfterVersion = urlParts.slice(uploadIndex+2).join('/');
-
-            console.log('📂 Extracted path:', pathAfterVersion);
-            return pathAfterVersion;
+            // More robust extraction: include version if present, remove file extension
+            const pathAfterUpload = urlParts.slice(uploadIndex + 1).join('/');
+            return pathAfterUpload.replace(/\.[^/.]+$/, "");
         } catch (error) {
             console.error('❌ Error extracting public_id:', error);
             throw new Error(`Invalid Cloudinary URL: ${error.message}`);
         }
     }
 
-    async validateImageUrl(imageUrl){
+    async validateImageUrl(imageUrl) {
         try {
             const fetch = (await import('node-fetch')).default;
-            const response = await fetch(imageUrl,{ method: 'HEAD' });
+            const response = await fetch(imageUrl, {
+                method: 'GET',
+                headers: { range: 'bytes=0-0' } // minimal download
+            });
 
-            if(!response.ok){
-                throw new Error(`Image URL validation failed: ${ response.status}`);
+            if (!response.ok) {
+                throw new Error(`Image URL validation failed: ${response.status}`);
             }
 
             console.log('✅ Image URL validation successful');
@@ -75,10 +76,10 @@ class CloudPDFToImageService{
         }
     }
 
-    createPlaceholderImage(resumeId){
+    createPlaceholderImage(resumeId) {
         console.log('🎨 Creating placeholder image...');
 
-        const placeholderUrl = cloudinary.url('placeholder',{
+        const placeholderUrl = cloudinary.url('placeholder', {
             resource_type: 'image',
             width: 800,
             height: 1100,
@@ -97,13 +98,13 @@ class CloudPDFToImageService{
         return placeholderUrl;
     }
 
-    async uploadAndConvertPDF(pdfBuffer,resumeId){
+    async uploadAndConvertPDF(pdfBuffer, resumeId) {
         try {
             console.log('🖼️ Uploading PDF buffer and converting to image...');
 
-            const result = await new Promise((resolve,reject) => {
+            const result = await new Promise((resolve, reject) => {
                 const uploadStream = cloudinary.uploader.upload_stream({
-                    resource_type: 'image',
+                    resource_type: 'auto', // supports PDF uploads
                     folder: 'resume-images',
                     public_id: `resume-image_${resumeId}`,
                     format: 'png',
@@ -111,19 +112,18 @@ class CloudPDFToImageService{
                     width: 800,
                     height: 1100,
                     crop: 'limit',
-                    quality: 'auth:good',
+                    quality: 'auto:good',
                     transformation: [
-                        { fetch_format: 'auto'},
+                        { fetch_format: 'auto' },
                         { flags: 'attachment' }
                     ]
                 },
-                    (error,result) => {
-                        if(error){
-                            console.log('Cloudinary upload error: ',error);
+                    (error, result) => {
+                        if (error) {
+                            console.log('Cloudinary upload error:', error);
                             reject(error);
-                        }
-                        else{
-                            resolve(error);
+                        } else {
+                            resolve(result);
                         }
                     }
                 );
@@ -139,13 +139,13 @@ class CloudPDFToImageService{
         }
     }
 
-    async getMultipleFormats(pdfUrl,resumeId){
+    async getMultipleFormats(pdfUrl, resumeId) {
         try {
             const publicId = this.extractPublicId(pdfUrl);
 
             const formats = {
-                thumbnail: cloudinary.url(publicId,{
-                    resource_type: 'image',
+                thumbnail: cloudinary.url(publicId, {
+                    resource_type: 'auto',
                     format: 'jpg',
                     page: 1,
                     width: 200,
@@ -153,8 +153,8 @@ class CloudPDFToImageService{
                     crop: 'fill',
                     quality: 'auto:good'
                 }),
-                preview: cloudinary.url(publicId,{
-                    resource_type: 'image',
+                preview: cloudinary.url(publicId, {
+                    resource_type: 'auto',
                     format: 'png',
                     page: 1,
                     width: 200,
@@ -162,13 +162,13 @@ class CloudPDFToImageService{
                     crop: 'limit',
                     quality: 'auto:good'
                 }),
-                fullsize: cloudinary.url(publicId,{
-                    resource_type: 'image',
+                fullsize: cloudinary.url(publicId, {
+                    resource_type: 'auto',
                     format: 'png',
                     page: 1,
                     width: 800,
                     height: 1100,
-                    crop:'limit',
+                    crop: 'limit',
                     quality: 'auto:good'
                 })
             };

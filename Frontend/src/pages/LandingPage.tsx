@@ -6,6 +6,7 @@ import AuthModal from '../components/AuthModal';
 import UploadProgress from '../components/UploadProgress';
 import { useAuth } from '../contexts/AuthContext';
 import { resumeService } from '../services/resumeService';
+import { useNavigate } from 'react-router-dom';
 
 interface FilePreviewProps {
   file: File;
@@ -94,7 +95,7 @@ const LandingPage = () => {
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'processing' | 'completed' | 'error'>('idle');
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [currentResumeId, setCurrentResumeId] = useState<string | null>(null);
-  
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Intersection Observer for scroll animations
@@ -198,30 +199,8 @@ const LandingPage = () => {
           );
 
           if (analysisResponse.success && analysisResponse.resume) {
-            const resume = analysisResponse.resume;
             
-            // Transform backend response to match frontend expectations
-            setAnalysisResult({
-              score: resume.overallScore || 0,
-              strengths: resume.jobAnalysis?.strengths || [],
-              improvements: resume.jobAnalysis?.improvements || [],
-              keywords: resume.jobAnalysis?.keywords || [],
-              sections: {
-                contact: resume.sections?.contact || 0,
-                summary: resume.sections?.summary || 0,
-                experience: resume.sections?.experience || 0,
-                education: resume.sections?.education || 0,
-                skills: resume.sections?.skills || 0
-              },
-              jobAnalysis: {
-                companyName: resume.companyName,
-                jobTitle: resume.jobTitle,
-                jobDescription: resume.jobDescription.substring(0, 100) + '...',
-                matchScore: resume.jobAnalysis?.matchScore || 0
-              }
-            });
-
-            setUploadStatus('completed');
+            navigate(`/analysis/${uploadResponse.resumeId}`);
           } else {
             throw new Error('Analysis failed - no results received');
           }

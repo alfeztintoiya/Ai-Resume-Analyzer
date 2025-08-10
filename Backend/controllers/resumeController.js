@@ -206,7 +206,7 @@ const analyzeResumeWithAI = async (resumeId, fileUrl, mimeType, companyName, job
     
 
     const imagePromise = mimeType === 'application/pdf'
-      ? cloudPdfToImageService.converPDFToImage(fileUrl,resumeId) : Promise.resolve(null);
+      ? cloudPdfToImageService.convertPDFToImage(fileUrl,resumeId) : Promise.resolve(null);
 
     const [analysis,imageUrl] = await Promise.all([analysisPromise,imagePromise]);
 
@@ -422,7 +422,7 @@ const convertResumeToImage = async (req,res) => {
       });
     }
 
-    const imageUrl = await cloudPdfToImageService.converPDFToImage(resume.file_path,resumeId);
+    const imageUrl = await cloudPdfToImageService.convertPDFToImage(resume.file_path,resumeId);
 
     const { error: updateError } = await supabase
                                   .from('resumes')

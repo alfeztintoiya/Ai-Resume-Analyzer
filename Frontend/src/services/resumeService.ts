@@ -43,8 +43,9 @@ export interface ResumeHistoryResponse {
     companyName: string;
     jobTitle: string;
     analysisStatus: string;
-    overallScore?: number;
-    jobMatchScore?: number;
+    overallScore: number;
+    jobMatchScore: number;
+    resumeImageUrl?: string;
     createdAt: string;
     processedAt?: string;
   }>;
@@ -137,6 +138,9 @@ class ResumeService {
     }
   }
 
+  async getResumeAnalysis(resumeId: string): Promise<AnalysisResponse> {
+    return this.getAnalysis(resumeId);
+  }
   // Get user's resume history
   async getResumeHistory(): Promise<ResumeHistoryResponse> {
     try {
@@ -227,6 +231,31 @@ class ResumeService {
       poll();
     });
   }
+
+  async getUserResumes(): Promise<ResumeHistoryResponse> {
+    try {
+      const response = await fetch(`${this.baseURL}/history`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || `HTTP error! status: ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Get user resumes error:', error);
+      throw error;
+    }
+  }
+
+  
 }
 
 export const resumeService = new ResumeService();
