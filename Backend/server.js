@@ -9,7 +9,7 @@ require("dotenv").config();
 require("./config/passport");
 
 const app = express();
-const PORT = 5003;
+const PORT = process.env.PORT;
 
 // Cloudinary Configuration
 cloudinary.config({
