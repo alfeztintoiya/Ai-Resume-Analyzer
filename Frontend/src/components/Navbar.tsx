@@ -5,6 +5,7 @@ import { getUserFullName } from '../utils/userUtils';
 import Avatar from './Avatar';
 import type { NavbarProps } from '../types';
 import './Navbar.css';
+import { Link } from 'react-router-dom';
 
 const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -32,7 +33,9 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
             <div className="logo-icon">
               <BarChart3 className="w-5 h-5" />
             </div>
-            <span className="logo-text">ResumeAI</span>
+            <a href="/">
+              <span className="logo-text">ResumeAI</span>
+            </a>
           </div>
           
           { isAuthenticated ? (

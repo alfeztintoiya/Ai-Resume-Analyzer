@@ -176,7 +176,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
                 <div className="form-group">
                   <label className="form-label">Email</label>
                   <div className="form-input-container">
-                    <Mail className="form-input-icon" />
+                    {/* <Mail className="form-input-icon" /> */}
                     <input
                       type="email"
                       className={`form-input ${errors.email ? 'error' : ''}`}
@@ -191,7 +191,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
                 <div className="form-group">
                   <label className="form-label">Password</label>
                   <div className="form-input-container">
-                    <Lock className="form-input-icon" />
+                    {/* <Lock className="form-input-icon" /> */}
                     <input
                       type={showPassword ? 'text' : 'password'}
                       className={`form-input ${errors.password ? 'error' : ''}`}
@@ -266,7 +266,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
                   <div className="form-group">
                     <label className="form-label">Full Name</label>
                     <div className="form-input-container">
-                      <User className="form-input-icon" />
+                      {/* <User className="form-input-icon" /> */}
                       <input
                         type="text"
                         className={`form-input ${errors.name ? 'error' : ''}`}
@@ -296,7 +296,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
                 <div className="form-group">
                   <label className="form-label">Email</label>
                   <div className="form-input-container">
-                    <Mail className="form-input-icon" />
+                    {/* <Mail className="form-input-icon" /> */}
                     <input
                       type="email"
                       className={`form-input ${errors.email ? 'error' : ''}`}
@@ -311,7 +311,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
                 <div className="form-group">
                   <label className="form-label">Password</label>
                   <div className="form-input-container">
-                    <Lock className="form-input-icon" />
+                    {/* <Lock className="form-input-icon" /> */}
                     <input
                       type={showPassword ? 'text' : 'password'}
                       className={`form-input ${errors.password ? 'error' : ''}`}
@@ -333,7 +333,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, initialTab = 'lo
                 <div className="form-group">
                   <label className="form-label">Confirm Password</label>
                   <div className="form-input-container">
-                    <Lock className="form-input-icon" />
+                    {/* <Lock className="form-input-icon" /> */}
                     <input
                       type={showConfirmPassword ? 'text' : 'password'}
                       className={`form-input ${errors.confirmPassword ? 'error' : ''}`}

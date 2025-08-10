@@ -36,7 +36,7 @@ class EmailService {
           address: process.env.EMAIL_USER,
         },
         to: userEmail,
-        subject: "Verify Your Email Address - ResumeAI",
+        subject: "Verify Your Email Address - Resumind",
         html: this.getVerificationEmailTemplate(userName, verificationUrl),
       };
 
@@ -57,11 +57,11 @@ class EmailService {
 
       const mailOptions = {
         from: {
-          name: "ResumeAI",
+          name: "Resumind",
           address: process.env.EMAIL_USER,
         },
         to: userEmail,
-        subject: "Reset Your Password - ResumeAI",
+        subject: "Reset Your Password - Resumind",
         html: this.getPasswordResetEmailTemplate(userName, resetUrl),
       };
 
@@ -94,11 +94,11 @@ class EmailService {
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>Welcome to ResumeAI!</h1>
+                        <h1>Welcome to Resumind!</h1>
                     </div>
                     <div class="content">
                         <h2>Hi ${userName},</h2>
-                        <p>Thank you for signing up for ResumeAI! To complete your registration and start analyzing your resumes, please verify your email address.</p>
+                        <p>Thank you for signing up for Resumind! To complete your registration and start analyzing your resumes, please verify your email address.</p>
                         
                         <p>Click the button below to verify your email:</p>
                         <a href="${verificationUrl}" class="button">Verify Email Address</a>
@@ -110,10 +110,10 @@ class EmailService {
                         
                         <p>If you didn't create an account with us, please ignore this email.</p>
                         
-                        <p>Best regards,<br>The ResumeAI Team</p>
+                        <p>Best regards,<br>The Resumind Team</p>
                     </div>
                     <div class="footer">
-                        <p>© 2025 ResumeAI. All rights reserved.</p>
+                        <p>© 2025 Resumind. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -145,7 +145,7 @@ class EmailService {
                     </div>
                     <div class="content">
                         <h2>Hi ${userName},</h2>
-                        <p>We received a request to reset your password for your ResumeAI account.</p>
+                        <p>We received a request to reset your password for your Resumind account.</p>
                         
                         <p>Click the button below to reset your password:</p>
                         <a href="${resetUrl}" class="button">Reset Password</a>
@@ -157,10 +157,10 @@ class EmailService {
                         
                         <p>If you didn't request a password reset, please ignore this email. Your password will remain unchanged.</p>
                         
-                        <p>Best regards,<br>The ResumeAI Team</p>
+                        <p>Best regards,<br>The Resumind Team</p>
                     </div>
                     <div class="footer">
-                        <p>© 2025 ResumeAI. All rights reserved.</p>
+                        <p>© 2025 Resumind. All rights reserved.</p>
                     </div>
                 </div>
             </body>

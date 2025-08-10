@@ -58,3 +58,8 @@ const prepareInstructions = (jobTitle,jobDescription,AIResponseFormat) => {
   Do not include any other text or comments.
     `
 } 
+
+module.exports = {
+  AIResponseFormat,
+  prepareInstructions
+}
