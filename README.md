@@ -1,11 +1,22 @@
 # 📄 Resume Analyzer - AI-Powered Resume Analysis Platform
 
-> Transform your job search with intelligent resume analysis powered by Google Gemini AI
+> Transform your job search with intelligent resume analysis powered by advanced AI technology
 
 [![Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://your-demo-link.com)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-Express-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-Express-green.s- 📧 **Email:** [your-email@domain.com](mailto:your-email@domain.com)
+
+- 🐛 **Issues:** [GitHub Issues](https://github.com/yourusername/resume-analyzer/issues)
+- 💬 **Discussions:** [GitHub Discussions](https://github.com/yourusername/resume-analyzer/discussions)
+
+## ⭐ **Show Your Support**
+
+If this project helped you, please give it a ⭐ on GitHub!
+
+---
+
+**Built with ❤️ using React, Node.js, and Advanced AI Technology**//nodejs.org/)
 
 ## 🚀 **What This Project Does**
 
@@ -15,7 +26,7 @@ Resume Analyzer is a modern web application that uses artificial intelligence to
 
 ### 🤖 **AI-Powered Analysis**
 
-- **Google Gemini AI Integration** - Leverages the latest Gemini 2.0 Flash model for accurate analysis
+- **Advanced AI Integration** - Leverages state-of-the-art language models for accurate analysis
 - **Intelligent Content Review** - Analyzes resume content, structure, and job alignment
 - **ATS Optimization** - Ensures your resume passes Applicant Tracking Systems
 
@@ -58,7 +69,7 @@ Resume Analyzer is a modern web application that uses artificial intelligence to
 ### **Backend Technologies**
 
 - **Node.js + Express** - Robust server-side architecture
-- **Google Gemini AI** - State-of-the-art AI for resume analysis
+- **Advanced AI Models** - State-of-the-art AI for intelligent resume analysis
 - **JWT Authentication** - Secure, stateless user sessions
 - **Multer** - Efficient file upload handling
 - **Cloudinary** - Cloud-based file storage and processing
@@ -87,7 +98,7 @@ Track your resume improvements over time and see how your scores improve as you 
 
 1. **📤 Upload Your Resume** - Drag and drop your PDF resume
 2. **🎯 Specify Target Role** - Enter company name, job title, and description
-3. **🤖 AI Analysis** - Our Gemini AI processes your resume in seconds
+3. **🤖 AI Analysis** - Our advanced AI processes your resume in seconds
 4. **📊 Get Detailed Feedback** - Receive scores, suggestions, and optimization tips
 5. **📈 Track Progress** - Save results and compare multiple analyses
 
@@ -96,7 +107,7 @@ Track your resume improvements over time and see how your scores improve as you 
 ### **Prerequisites**
 
 - Node.js 18+
-- Google Gemini API Key ([Get one here](https://ai.google.dev/))
+- AI API Key ([Setup guide available](https://docs.example.com/))
 - Supabase Account ([Free tier available](https://supabase.com/))
 - Cloudinary Account ([Free tier available](https://cloudinary.com/))
 
@@ -125,7 +136,7 @@ PORT=5003
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 JWT_SECRET=your_jwt_secret
-GEMINI_API_KEY=your_gemini_api_key
+AI_API_KEY=your_ai_api_key
 CLOUDINARY_CLOUD_NAME=your_cloudinary_name
 CLOUDINARY_API_KEY=your_cloudinary_key
 CLOUDINARY_API_SECRET=your_cloudinary_secret
@@ -212,11 +223,21 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 # JWT Configuration
 JWT_SECRET=your_jwt_secret_key
 
-# Google Gemini AI
-GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-2.0-flash-exp
+# AI Configuration
+AI_API_KEY=your_ai_api_key
+AI_MODEL=advanced-model
 
 # Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# Email Configuration (for verification)
+EMAIL_SERVICE=your_email_service
+EMAIL_USER=your_email_user
+EMAIL_PASS=your_email_password
+```
+
 ## 📁 **Project Structure**
 
 ````
@@ -227,7 +248,7 @@ Resume_Analyzer/
 │ │ ├── authController.js # User authentication
 │ │ └── resumeController.js # Resume processing
 │ ├── services/ # External services
-│ │ ├── geminiService.js # AI analysis
+│ │ ├── aiService.js # AI analysis
 │ │ └── cloudPdfToImageService.js # PDF processing
 │ ├── routes/ # API endpoints
 │ └── middleware/ # Authentication middleware
@@ -314,15 +335,10 @@ If this project helped you, please give it a ⭐ on GitHub!
 
 ---
 
-**Built with ❤️ using React, Node.js, and Google Gemini AI**
-job_title VARCHAR(255) NOT NULL,
-job_description TEXT NOT NULL,
-analysis_status VARCHAR(50) DEFAULT 'PENDING',
-overall_score INTEGER,
-contact_score INTEGER,
-summary_score INTEGER,
-experience_score INTEGER,
-education_score INTEGER,
+**Built with ❤️ using React, Node.js, and Advanced AI Technology**
+
+## 🔧 **Key Features in Detail**
+
 skills_score INTEGER,
 job_match_score INTEGER,
 strengths TEXT[],
@@ -372,7 +388,7 @@ Resume_Analyzer/
 │   │   ├── auth.js               # Auth routes
 │   │   └── resume.js             # Resume routes
 │   ├── services/
-│   │   ├── geminiService.js      # Gemini AI integration
+│   │   ├── aiService.js          # AI integration
 │   │   ├── cloudPdfToImageService.js # PDF processing
 │   │   └── emailService.js       # Email notifications
 │   ├── utils/
