@@ -34,7 +34,7 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
               <BarChart3 className="w-5 h-5" />
             </div>
             <a href="/">
-              <span className="logo-text">ResumeAI</span>
+              <span className="logo-text">Resumind</span>
             </a>
           </div>
           
