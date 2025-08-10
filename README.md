@@ -5,18 +5,6 @@
 [![Demo](https://img.shields.io/badge/Live-Demo-brightgreen.svg)](https://your-demo-link.com)
 [![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-Express-green.s- 📧 **Email:** [your-email@domain.com](mailto:your-email@domain.com)
-
-- 🐛 **Issues:** [GitHub Issues](https://github.com/yourusername/resume-analyzer/issues)
-- 💬 **Discussions:** [GitHub Discussions](https://github.com/yourusername/resume-analyzer/discussions)
-
-## ⭐ **Show Your Support**
-
-If this project helped you, please give it a ⭐ on GitHub!
-
----
-
-**Built with ❤️ using React, Node.js, and Advanced AI Technology**//nodejs.org/)
 
 ## 🚀 **What This Project Does**
 
@@ -125,28 +113,6 @@ cd Backend && npm install
 cd ../Frontend && npm install
 ```
 
-### **Environment Setup**
-
-Create `.env` files in both Backend and Frontend directories:
-
-**Backend/.env:**
-
-```env
-PORT=5003
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-JWT_SECRET=your_jwt_secret
-AI_API_KEY=your_ai_api_key
-CLOUDINARY_CLOUD_NAME=your_cloudinary_name
-CLOUDINARY_API_KEY=your_cloudinary_key
-CLOUDINARY_API_SECRET=your_cloudinary_secret
-```
-
-**Frontend/.env:**
-
-```env
-VITE_API_BASE_URL=http://localhost:5003/api/v1
-```
 
 ### **Run the Application**
 
@@ -202,69 +168,7 @@ Visit `http://localhost:5173` to see the application!
 | **ATS Optimization**     | Format, keywords, structure           | Automated system compatibility          |
 | **Job Matching**         | Role-specific alignment               | Fit for target position                 |
 
-````
 
-### **Environment Configuration**
-
-#### **Backend Environment Variables**
-
-Create `Backend/.env` file:
-
-```env
-# Server Configuration
-PORT=5003
-NODE_ENV=development
-
-# Database Configuration (Supabase)
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-
-# JWT Configuration
-JWT_SECRET=your_jwt_secret_key
-
-# AI Configuration
-AI_API_KEY=your_ai_api_key
-AI_MODEL=advanced-model
-
-# Cloudinary Configuration
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-
-# Email Configuration (for verification)
-EMAIL_SERVICE=your_email_service
-EMAIL_USER=your_email_user
-EMAIL_PASS=your_email_password
-```
-
-## 📁 **Project Structure**
-
-````
-
-Resume_Analyzer/
-├── Backend/ # Node.js/Express API
-│ ├── controllers/ # Business logic
-│ │ ├── authController.js # User authentication
-│ │ └── resumeController.js # Resume processing
-│ ├── services/ # External services
-│ │ ├── aiService.js # AI analysis
-│ │ └── cloudPdfToImageService.js # PDF processing
-│ ├── routes/ # API endpoints
-│ └── middleware/ # Authentication middleware
-│
-├── Frontend/ # React/TypeScript UI
-│ ├── src/
-│ │ ├── pages/ # Main application pages
-│ │ │ ├── LandingPage.tsx # Home page
-│ │ │ ├── ResumeAnalysisPage.tsx # Results display
-│ │ │ └── ResumeHistoryPage.tsx # User history
-│ │ ├── components/ # Reusable UI components
-│ │ ├── services/ # API communication
-│ │ └── types/ # TypeScript definitions
-│ └── public/ # Static assets
-
-````
 
 ## 🔧 **Key Features in Detail**
 
@@ -294,22 +198,6 @@ Resume_Analyzer/
 - **Professionals** - Fine-tune resumes for promotions
 - **Recruiters** - Quickly assess candidate resume quality
 
-## 🚀 **Deployment**
-
-### **Quick Deploy Options**
-
-**Frontend (Vercel/Netlify):**
-```bash
-npm run build
-# Deploy the 'dist' folder
-````
-
-**Backend (Railway/Render):**
-
-```bash
-# Set environment variables in platform
-# Deploy with: npm start
-```
 
 ## 🤝 **Contributing**
 
@@ -325,177 +213,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙋‍♂️ **Support**
 
-- 📧 **Email:** [your-email@domain.com](mailto:your-email@domain.com)
+- 📧 **Email:** [alfez.tintoiya25@domain.com](mailto:your-email@domain.com)
 - 🐛 **Issues:** [GitHub Issues](https://github.com/yourusername/resume-analyzer/issues)
 - 💬 **Discussions:** [GitHub Discussions](https://github.com/yourusername/resume-analyzer/discussions)
 
 ## ⭐ **Show Your Support**
 
 If this project helped you, please give it a ⭐ on GitHub!
-
----
-
-**Built with ❤️ using React, Node.js, and Advanced AI Technology**
-
-## 🔧 **Key Features in Detail**
-
-skills_score INTEGER,
-job_match_score INTEGER,
-strengths TEXT[],
-improvements TEXT[],
-keywords TEXT[],
-analysis_data JSONB,
-resume_image_url TEXT,
-error_message TEXT,
-processed_at TIMESTAMP WITH TIME ZONE,
-created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
-````
-
-### **Running the Application**
-
-1. **Start the Backend**
-
-```bash
-cd Backend
-npm start
-````
-
-Server runs on `http://localhost:5003`
-
-2. **Start the Frontend**
-   ```bash
-   cd Frontend
-   npm run dev
-   ```
-   Client runs on `http://localhost:5173`
-
----
-
-## 📁 **Project Structure**
-
-```
-Resume_Analyzer/
-├── Backend/
-│   ├── controllers/
-│   │   ├── authController.js      # Authentication logic
-│   │   └── resumeController.js    # Resume upload and analysis
-│   ├── middleware/
-│   │   └── authMiddleware.js      # JWT verification
-│   ├── routes/
-│   │   ├── auth.js               # Auth routes
-│   │   └── resume.js             # Resume routes
-│   ├── services/
-│   │   ├── aiService.js          # AI integration
-│   │   ├── cloudPdfToImageService.js # PDF processing
-│   │   └── emailService.js       # Email notifications
-│   ├── utils/
-│   │   ├── supabaseClient.js     # Database connection
-│   │   └── cloudinaryConfig.js   # File storage config
-│   ├── .env
-│   ├── package.json
-│   └── server.js                 # Express server setup
-│
-├── Frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.tsx        # Navigation component
-│   │   │   ├── AuthModal.tsx     # Login/Register modal
-│   │   │   ├── UploadProgress.tsx # File upload progress
-│   │   │   └── Avatar.tsx        # User avatar component
-│   │   ├── pages/
-│   │   │   ├── LandingPage.tsx   # Main landing page
-│   │   │   ├── ResumeAnalysisPage.tsx # Analysis results
-│   │   │   └── ResumeHistoryPage.tsx  # User's analysis history
-│   │   ├── services/
-│   │   │   └── resumeService.ts  # API service layer
-│   │   ├── types/
-│   │   │   └── index.ts          # TypeScript definitions
-│   │   ├── App.tsx               # Main app component
-│   │   └── main.tsx              # React entry point
-│   ├── public/
-│   ├── .env
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── tailwind.config.js
-│
-├── README.md
-└── .gitignore
-```
-
-## 🔧 **Key Features in Detail**
-
-### **AI Analysis Engine**
-
-- **Multi-dimensional Evaluation** - Analyzes content, structure, keywords, and job fit
-- **Contextual Understanding** - Considers industry, role level, and company culture
-- **Actionable Recommendations** - Specific suggestions for improvement
-- **ATS Optimization** - Ensures compatibility with tracking systems
-
-### **User Experience**
-
-- **Drag & Drop Upload** - Easy PDF resume uploading
-- **Real-time Processing** - Live status updates during analysis
-- **Responsive Design** - Works on all devices and screen sizes
-- **Intuitive Interface** - Clean, professional design
-
-### **Data Management**
-
-- **Secure Storage** - All files stored securely in the cloud
-- **Analysis History** - Track multiple resume versions over time
-- **Progress Tracking** - See how your scores improve
-- **Export Options** - Download results for offline reference
-
-## 🎯 **Use Cases**
-
-- **Job Seekers** - Optimize resumes for specific positions
-- **Career Changers** - Adapt resumes for new industries
-- **Students** - Improve first professional resumes
-- **Professionals** - Fine-tune resumes for promotions
-- **Recruiters** - Quickly assess candidate resume quality
-
-## 🚀 **Deployment**
-
-### **Quick Deploy Options**
-
-**Frontend (Vercel/Netlify):**
-
-```bash
-npm run build
-# Deploy the 'dist' folder
-```
-
-**Backend (Railway/Render):**
-
-```bash
-# Set environment variables in platform
-# Deploy with: npm start
-```
-
-## 🤝 **Contributing**
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 **License**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## �‍♂️ **Support**
-
-- 📧 **Email:** [your-email@domain.com](mailto:your-email@domain.com)
-- � **Issues:** [GitHub Issues](https://github.com/yourusername/resume-analyzer/issues)
-- 💬 **Discussions:** [GitHub Discussions](https://github.com/yourusername/resume-analyzer/discussions)
-
-## ⭐ **Show Your Support**
-
-If this project helped you, please give it a ⭐ on GitHub!
-
----
-
-**Built with ❤️ using React, Node.js, and Google Gemini AI**
