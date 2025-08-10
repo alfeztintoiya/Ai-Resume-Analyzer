@@ -5,6 +5,7 @@ const {
   getResumeAnalysis,
   getUserResumes,
   deleteResume,
+  convertResumeToImage,
 } = require("../controllers/resumeController");
 
 const router = express.Router();
@@ -17,6 +18,9 @@ router.get("/:resumeId/analysis", getResumeAnalysis);
 
 // Get user's resume history
 router.get("/history", getUserResumes);
+
+//convert existing resume to image
+router.post("/:resumeId/convert-image",convertResumeToImage);
 
 // Delete resume
 router.delete("/:resumeId", deleteResume);

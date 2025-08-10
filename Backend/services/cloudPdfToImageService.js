@@ -39,7 +39,7 @@ class CloudPDFToImageService{
         }
     }
 
-    extractPublicid(cloudinaryUrl){
+    extractPublicId(cloudinaryUrl){
         try {
             const urlParts = cloudinaryUrl.split('/');
 
@@ -78,7 +78,7 @@ class CloudPDFToImageService{
     createPlaceholderImage(resumeId){
         console.log('🎨 Creating placeholder image...');
 
-        const placeholder = cloudinary.url('placeholder',{
+        const placeholderUrl = cloudinary.url('placeholder',{
             resource_type: 'image',
             width: 800,
             height: 1100,
@@ -139,7 +139,7 @@ class CloudPDFToImageService{
         }
     }
 
-    async getMultipleFormats(pdfUrl,resumeid){
+    async getMultipleFormats(pdfUrl,resumeId){
         try {
             const publicId = this.extractPublicId(pdfUrl);
 
@@ -159,12 +159,29 @@ class CloudPDFToImageService{
                     page: 1,
                     width: 200,
                     height: 260,
-                    crop: 'fill',
-                    
+                    crop: 'limit',
+                    quality: 'auto:good'
+                }),
+                fullsize: cloudinary.url(publicId,{
+                    resource_type: 'image',
+                    format: 'png',
+                    page: 1,
+                    width: 800,
+                    height: 1100,
+                    crop:'limit',
+                    quality: 'auto:good'
                 })
-            }
+            };
+            return formats;
         } catch (error) {
-            
+            console.error('❌ Multiple formats generation error:', error);
+            return {
+                thumbnail: this.createPlaceholderImage(resumeId),
+                preview: this.createPlaceholderImage(resumeId),
+                fullsize: this.createPlaceholderImage(resumeId)
+            };
         }
     }
 }
+
+module.exports = new CloudPDFToImageService();

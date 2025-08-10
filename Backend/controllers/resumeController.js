@@ -3,6 +3,7 @@ const { v2: cloudinary } = require('cloudinary');
 const jwt = require('jsonwebtoken');
 const supabase = require('../utils/supabaseClient');
 const geminiService = require('../services/geminiService');
+const cloudPdfToImageService = require('../services/cloudPdfToImageService');
 const { randomUUID } = require('crypto');
 
 // Configure multer for memory storage
@@ -195,7 +196,7 @@ const analyzeResumeWithAI = async (resumeId, fileUrl, mimeType, companyName, job
       .eq('id', resumeId);
 
     // 🤖 CALL GEMINI AI TO ANALYZE PDF
-    const analysis = await geminiService.analyzeResume(
+    const analysisPromise = geminiService.analyzeResume(
       fileUrl, 
       mimeType, 
       jobTitle, 
@@ -203,8 +204,16 @@ const analyzeResumeWithAI = async (resumeId, fileUrl, mimeType, companyName, job
       companyName
     );
     
-    console.log('✅ AI analysis completed successfully');
 
+    const imagePromise = mimeType === 'application/pdf'
+      ? cloudPdfToImageService.converPDFToImage(fileUrl,resumeId) : Promise.resolve(null);
+
+    const [analysis,imageUrl] = await Promise.all([analysisPromise,imagePromise]);
+
+    console.log('✅ AI analysis completed successfully');
+    if(imageUrl){
+      console.log('✅ PDF to image conversion completed successfully');
+    }
     // Calculate job match score
     const jobMatchScore = Math.round(
       (analysis.sections.contact + analysis.sections.summary + 
@@ -212,25 +221,32 @@ const analyzeResumeWithAI = async (resumeId, fileUrl, mimeType, companyName, job
        analysis.sections.skills) / 5
     );
 
+    // Save analysis results with image URL
+    const updateData = {
+      analysis_status: 'COMPLETED',
+      overall_score: analysis.overallScore,
+      contact_score: analysis.sections.contact,
+      summary_score: analysis.sections.summary,
+      experience_score: analysis.sections.experience,
+      education_score: analysis.sections.education,
+      skills_score: analysis.sections.skills,
+      job_match_score: jobMatchScore,
+      strengths: analysis.strengths,
+      improvements: analysis.improvements,
+      keywords: analysis.keywords,
+      analysis_data: analysis.rawAnalysis,
+      processed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    if(imageUrl){
+      updateData.resume_image_url = imageUrl;
+    }
+
     // Save analysis results
     const { error: updateError } = await supabase
       .from('resumes')
-      .update({
-        analysis_status: 'COMPLETED',
-        overall_score: analysis.overallScore,
-        contact_score: analysis.sections.contact,
-        summary_score: analysis.sections.summary,
-        experience_score: analysis.sections.experience,
-        education_score: analysis.sections.education,
-        skills_score: analysis.sections.skills,
-        job_match_score: jobMatchScore,
-        strengths: analysis.strengths,
-        improvements: analysis.improvements,
-        keywords: analysis.keywords,
-        analysis_data: analysis.rawAnalysis,
-        processed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', resumeId);
 
     if (updateError) {
@@ -309,6 +325,7 @@ const getResumeAnalysis = async (req, res) => {
           keywords: resume.keywords
         },
         analysisData: resume.analysis_data,
+        resumeImageUrl: resume.resume_image_url,
         processedAt: resume.processed_at,
         createdAt: resume.created_at,
         errorMessage: resume.error_message
@@ -361,6 +378,7 @@ const getUserResumes = async (req, res) => {
       analysisStatus: resume.analysis_status,
       overallScore: resume.overall_score,
       jobMatchScore: resume.job_match_score,
+      resumeImageUrl: resume.resume_image_url,
       createdAt: resume.created_at,
       processedAt: resume.processed_at
     }));
@@ -379,6 +397,63 @@ const getUserResumes = async (req, res) => {
     });
   }
 };
+
+const convertResumeToImage = async (req,res) => {
+  try {
+    const { resumeId } = req.params;
+    const token = req.cookies.token;
+
+    if(!token){
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required'
+      });
+    }
+
+    const decoded = jwt.verify(token,process.env.JWT_SECRET);
+    const userId = decoded.userId || decoded.id;
+
+    const { data: resume, error: resumeError } = await supabase.from('resumes').select('*').eq('id',resumeId).eq('user_id',userId).single();
+
+    if(resumeError || !resume){
+      return res.status(404).json({
+        success: false,
+        message: 'Resume not found'
+      });
+    }
+
+    const imageUrl = await cloudPdfToImageService.converPDFToImage(resume.file_path,resumeId);
+
+    const { error: updateError } = await supabase
+                                  .from('resumes')
+                                  .update({
+                                    resume_image_url: imageUrl,
+                                    updated_at: new Date().toISOString()
+                                  })
+                                  .eq('id',resumeId);
+      
+    if(updateError){
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to save image URL'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Resume converted to image successfully',
+      imageUrl: imageUrl
+    });
+
+  } catch (error) {
+    console.log('Convert resume to image error:',error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 
 // Delete resume
 const deleteResume = async (req, res) => {
@@ -427,6 +502,11 @@ const deleteResume = async (req, res) => {
     // Delete from Cloudinary
     try {
       await cloudinary.uploader.destroy(resume.file_name, { resource_type: 'raw' });
+
+      if(resume.resume_image_url){
+        const imagePublicId = `resume-images/resume_image_${resumeId}`;
+        await cloudinary.uploader.destroy(imagePublicId,{ resource_type: 'image' });
+      }
     } catch (cloudinaryError) {
       console.error('Cloudinary deletion error:', cloudinaryError);
     }
@@ -450,5 +530,6 @@ module.exports = {
   uploadResume,
   getResumeAnalysis,
   getUserResumes,
-  deleteResume
+  deleteResume,
+  convertResumeToImage
 };
