@@ -46,6 +46,18 @@
   color: #1a1a1a;
 }
 
+.logo-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.logo-button:hover .logo-text {
+  color: #3b82f6;
+}
+
 .nav-desktop {
   display: none;
   gap: 32px;
@@ -61,6 +73,11 @@
   color: #6b7280;
   text-decoration: none;
   transition: color 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
 }
 
 .nav-link:hover {

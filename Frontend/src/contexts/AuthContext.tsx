@@ -1,98 +1,129 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { authService as authApi, fetchMe } from '../services/authService';
 import type { ReactNode } from 'react';
-import { authService } from '../services/authService';
-import type { User, AuthResponse, AuthContextType, CreateUserData } from '../types';
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+type User = {
+  id: string;
+  email: string;
+  name?: string;
+  avatarUrl?: string | null;
+  emailVerified?: boolean;
+  role?: string;
 };
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
+type AuthContextValue = {
+  user: User | null;
+  loading: boolean;
+  isAuthenticated: boolean;
+  setUser: (u: User | null) => void;
+  refreshUser: (options?: { retry?: number; delayMs?: number }) => Promise<void>;
+  login: (email: string, password: string) => Promise<any>;
+  register: (payload: { name: string; email: string; password: string }) => Promise<any>;
+  logout: () => Promise<void>;
+};
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
+};
+
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const latestRefreshId = useRef(0);
 
-  const checkAuth = async () => {
-    setIsLoading(true);
-    try {
-      const response = await authService.getCurrentUser();
-      if (response.success && response.user) {
-        setUser(response.user);
-      } else {
-        setUser(null);
+  const refreshUser = async (options?: { retry?: number; delayMs?: number }) => {
+    const { retry = 0, delayMs = 0 } = options || {};
+    
+    const attempt = async () => {
+      const myId = ++latestRefreshId.current;
+      try {
+        const data = await fetchMe();
+        if (myId !== latestRefreshId.current) return;
+        if (data?.authenticated && data.user) {
+          setUser(data.user);
+          return true; // Success
+        } else {
+          // Only set to null if we got a clear "not authenticated" response
+          if (data && data.authenticated === false) {
+            setUser(null);
+          }
+          return false; // Not authenticated
+        }
+      } catch (error) {
+        if (myId !== latestRefreshId.current) return false;
+        // Don't clear user on network errors - keep existing state
+        return false;
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setUser(null);
-    } finally {
-      setIsLoading(false);
+    };
+
+    if (delayMs > 0) {
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+    
+    const success = await attempt();
+    if (success) return; // Already authenticated, no need to retry
+
+    // Retry logic if still not authenticated
+    for (let i = 0; i < retry; i++) {
+      await new Promise((r) => setTimeout(r, 100 * (i + 1)));
+      const retrySuccess = await attempt();
+      if (retrySuccess) break;
     }
   };
 
   useEffect(() => {
-    checkAuth();
+    let mounted = true;
+    const initAuth = async () => {
+      try {
+        const data = await fetchMe();
+        if (!mounted) return; // Component unmounted
+        if (data?.authenticated && data.user) {
+          setUser(data.user);
+        }
+        // Don't set user to null here - let user remain unauthenticated by default
+      } catch {
+        // Don't clear user on network errors during init
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    initAuth();
+    return () => { mounted = false; };
   }, []);
 
-  const login = async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await authService.login(email, password);
-    if (response.success && response.user) {
-      setUser(response.user);
-    }
-    return response;
+  const login = async (email: string, password: string) => {
+  const res = await authApi.login(email, password);
+    if (res?.success) await refreshUser();
+    return res;
   };
 
-  const register = async (userData: CreateUserData): Promise<AuthResponse> => {
-    const response = await authService.register(userData);
-    if (response.success && response.user) {
-      setUser(response.user);
-    }
-    return response;
-  };
-
-  const googleLogin = () => {
-    authService.googleLogin();
+  const register = async (payload: { name: string; email: string; password: string }) => {
+  const res = await authApi.register(payload);
+    // For email/password signup you may not auto-login; only refresh if API sets cookie
+    if (res?.success) await refreshUser();
+    return res;
   };
 
   const logout = async () => {
-    await authService.logout();
+  await authApi.logout();
     setUser(null);
   };
 
-  const verifyEmail = async (token: string) => {
-    const response = await authService.verifyEmail(token);
-    if (response.success && response.user) {
-      setUser(response.user);
-    }
-    return response;
-  };
-
-  const resendVerificationEmail = async (email: string) => {
-    return await authService.resendVerificationEmail(email);
-  };
-
-  const isAuthenticated = !!user;
-
-  const value: AuthContextType = {
+  const value: AuthContextValue = {
     user,
-    isLoading,
-    isAuthenticated,
+    loading,
+    isAuthenticated: !!user,
+    setUser,
+    refreshUser,
     login,
     register,
-    googleLogin,
     logout,
-    checkAuth,
-    verifyEmail,
-    resendVerificationEmail,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+}

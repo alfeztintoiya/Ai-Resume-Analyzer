@@ -8,6 +8,8 @@ export interface AuthResponse {
 
 export interface AuthContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>; // Added setUser
+  refreshUser: () => Promise<void>; // Added refreshUser
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<AuthResponse>;

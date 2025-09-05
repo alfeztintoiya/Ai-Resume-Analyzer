@@ -1,5 +1,5 @@
 const express = require("express");
-const passport = require("passport");
+const { OAuth2Client } = require("google-auth-library")
 const jwt = require("jsonwebtoken");
 const supabase = require("../utils/supabaseClient");
 const { verifyUser } = require("../controllers/userData");
@@ -9,46 +9,11 @@ const {
   logout,
   verifyEmail,
   resendVerificationEmail,
+  googleIdSignIn
 } = require("../controllers/auth");
 
 const router = express.Router();
 
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
-
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/login",
-    session: false,
-  }),
-  (req, res) => {
-    const token = jwt.sign(
-      {
-        userId: req.user.id,
-        email: req.user.email,
-        role: req.user.role || "USER",
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.redirect(`${process.env.FRONTEND_URL}`);
-  }
-);
 
 router.get("/verify", verifyUser);
 router.get("/me", verifyUser); // Add /me endpoint for frontend compatibility
@@ -59,7 +24,9 @@ router.post("/resend-verification", resendVerificationEmail);
 
 // Authentication routes
 router.post("/signup", signup);
-router.get("/login", login);
+router.post("/login", login);
 router.post("/logout", logout);
+
+router.post("/google",googleIdSignIn);
 
 module.exports = router;

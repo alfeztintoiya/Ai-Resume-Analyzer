@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart3, Menu, X, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserFullName } from '../utils/userUtils';
 import Avatar from './Avatar';
@@ -8,6 +9,7 @@ import './Navbar.css';
 
 const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignInClick = () => {
@@ -24,6 +26,10 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
     }
   };
 
+  const handleLogoClick = () => {
+    navigate('/');
+  };
+
   return (
     <header className="header">
       <div className="header-container">
@@ -32,14 +38,14 @@ const Navbar: React.FC<NavbarProps> = ({ onUploadClick, onSignInClick }) => {
             <div className="logo-icon">
               <BarChart3 className="w-5 h-5" />
             </div>
-            <a href="/">
+            <button onClick={handleLogoClick} className="logo-button">
               <span className="logo-text">Resumind</span>
-            </a>
+            </button>
           </div>
           
           { isAuthenticated ? (
             <nav className="nav-desktop">
-            <a href="/history" className="nav-link">My Analysis</a>
+            <button onClick={() => navigate('/history')} className="nav-link">My Analysis</button>
             </nav>
           ):null}
 

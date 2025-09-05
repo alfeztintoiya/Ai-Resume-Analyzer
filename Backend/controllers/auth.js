@@ -3,7 +3,145 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const supabase = require("../utils/supabaseClient");
 const emailService = require("../utils/emailService");
+const { OAuth2Client } = require("google-auth-library");
 const { randomUUID } = require("crypto");
+
+const oauthClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+function setSession(res, payload) {
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+  return token;
+}
+
+const googleIdSignIn = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: "Missing credential." });
+    }
+
+    const ticket = await oauthClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture, email_verified } = payload;
+
+    if (!email || !email_verified) {
+      return res
+        .status(400)
+        .json({ message: "Email is not available or not verified." });
+    }
+
+    // Try to find existing user
+    const { data: existing, error: findErr } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (findErr) {
+      console.error(findErr);
+      return res.status(500).json({ message: "DB Error" });
+    }
+
+    let user = existing;
+
+    if (!existing) {
+      const now = new Date().toISOString();
+      const username = email.split("@")[0];
+      const newId = randomUUID();
+      const insertPayload = {
+        id: newId,
+        email,
+        name: name || username,
+        password: "GOOGLE_OAUTH",
+        is_verified: true,
+        // avatar_url: picture || null,
+        // google_id: googleId,
+        username,
+        created_at: now,
+        updated_at: now,
+      };
+
+      const { error: insertErr } = await supabase
+        .from("users")
+        .insert([insertPayload]);
+
+      if (insertErr) {
+        console.error(insertErr);
+        return res.status(500).json({ message: "Failed to create user" });
+      }
+
+      const { data: created, error: refetchErr } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", newId)
+        .maybeSingle();
+
+      if (refetchErr || !created) {
+        console.error(refetchErr || "User not visible after insert");
+        // Fallback minimal user for session (use the id we created)
+        setSession(res, { userId: newId, email, role: "USER" });
+        return res.json({
+          user: {
+            id: newId,
+            email,
+            name: name || username,
+            avatarUrl: picture || null,
+            emailVerified: true,
+            provider: "google",
+          },
+        });
+      }
+      user = created;
+    } else {
+      const now = new Date().toISOString();
+      const { data: updated, error: updateErr } = await supabase
+        .from("users")
+        .update({
+          name: name || existing.name,
+          // avatar_url: picture || existing.avatar_url,
+          // google_id: googleId,
+          updated_at: now,
+        })
+        .eq("id", existing.id)
+        .select()
+        .maybeSingle();
+
+      if (!updateErr && updated) {
+        user = updated;
+      }
+    }
+
+    setSession(res, {
+      userId: user.id,
+      email: user.email,
+      role: user.role || "USER",
+    });
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatar_url || picture || null,
+        emailVerified: !!(user.is_verified ?? true),
+        provider: "google",
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(401).json({ message: "Invalid Google credential." });
+  }
+};
 
 const signup = async (req, res) => {
   try {
@@ -22,7 +160,7 @@ const signup = async (req, res) => {
       .from("users")
       .select("*")
       .eq("email", email)
-      .single();
+      .maybeSingle();
 
     // Handle database errors (excluding "not found" which is expected)
     if (userError && userError.code !== "PGRST116") {
@@ -49,24 +187,20 @@ const signup = async (req, res) => {
 
     const userId = randomUUID();
 
-    const { data: newUser, error: insertError } = await supabase
-      .from("users")
-      .insert([
-        {
-          id: userId,
-          email: email,
-          name: name,
-          password: hashedPassword,
-          is_verified: false,
-          verification_token: verificationToken,
-          verification_token_expiry: verificationTokenExpiry.toISOString(),
-          username: email.split("@")[0],
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ])
-      .select()
-      .single();
+    const { error: insertError } = await supabase.from("users").insert([
+      {
+        id: userId,
+        email: email,
+        name: name,
+        password: hashedPassword,
+        is_verified: false,
+        verification_token: verificationToken,
+        verification_token_expiry: verificationTokenExpiry.toISOString(),
+        username: email.split("@")[0],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+    ]);
 
     if (insertError) {
       console.log("User creation error: ", insertError);
@@ -78,8 +212,8 @@ const signup = async (req, res) => {
 
     // Send verification email
     const emailResult = await emailService.sendVerificationEmail(
-      newUser.email,
-      newUser.name,
+      email,
+      name,
       verificationToken
     );
 
@@ -90,13 +224,10 @@ const signup = async (req, res) => {
 
     // Don't create session until email is verified - user must verify email first
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = newUser;
-
     res.status(201).json({
       success: true,
       message:
         "Account created successfully. Please check your email to verify your account.",
-      user: userWithoutPassword,
       emailSent: emailResult.success,
     });
   } catch (error) {
@@ -123,7 +254,7 @@ const login = async (req, res) => {
       .from("users")
       .select("*")
       .eq("email", email)
-      .single();
+      .maybeSingle();
 
     if (userError || !user) {
       return res.status(401).json({
@@ -172,7 +303,7 @@ const login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -262,7 +393,7 @@ const verifyEmail = async (req, res) => {
       })
       .eq("id", user.id)
       .select()
-      .single();
+      .maybeSingle();
 
     if (updateError) {
       console.error("Email verification update error:", updateError);
@@ -397,4 +528,5 @@ module.exports = {
   logout,
   verifyEmail,
   resendVerificationEmail,
+  googleIdSignIn,
 };

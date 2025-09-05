@@ -130,4 +130,38 @@ class AuthService {
   };
 }
 
+export async function googleLoginWithCredential(credential: string){
+  const res = await fetch(`${API_BASE_URL}/auth/google`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({credential}),
+  });
+
+  if(!res.ok){
+    const text = await res.text();
+    console.error('Google login failed:', text);
+    throw new Error(text || 'Google login failed');
+  }
+  return await res.json();
+}
+
+export async function fetchMe(){
+  try {
+    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if(!res.ok){
+      return { authenticated: false, user: null } as any;
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    return { authenticated: false, user: null } as any;
+  }
+}
+
 export const authService = new AuthService();

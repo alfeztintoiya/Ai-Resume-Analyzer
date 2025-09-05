@@ -1,12 +1,12 @@
 const express = require("express");
-const passport = require("passport");
-const session = require("express-session");
+// const passport = require("passport");
+// const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
 const supabase = require("./utils/supabaseClient");
 require("dotenv").config();
-require("./config/passport");
+// require("./config/passport");
 
 const app = express();
 const PORT = process.env.PORT || 5003;
@@ -21,25 +21,20 @@ cloudinary.config({
 
 // Middlewares
 const cors = require("cors");
-app.use(
-  cors({
-    origin: "https://resumind-drab.vercel.app" || "http://localhost:5173",
-    credentials: true,
-  })
-);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
 app.use(
-  session({
-    secret: process.env.JWT_SECRET,
-    resave: false,
-    saveUninitialized: false,
+  cors({
+    origin: [
+      "http://localhost:5173",
+      process.env.FRONTEND_URL,
+    ],
+    credentials: true,
   })
 );
-app.use(passport.initialize());
-app.use(passport.session());
+
 
 //Routes Import
 const auth = require("./routes/auth");
