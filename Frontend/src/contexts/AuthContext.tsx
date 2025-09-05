@@ -42,25 +42,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshUser = async (options?: { retry?: number; delayMs?: number }) => {
     const { retry = 0, delayMs = 0 } = options || {};
     const myId = ++latestRefreshId.current;
+    console.log('[AUTH] refreshUser called with options:', { retry, delayMs, requestId: myId });
 
     const attempt = async () => {
       try {
-        if (myId !== latestRefreshId.current) return false; // Stale request
+        if (myId !== latestRefreshId.current) {
+          console.log('[AUTH] Stale refresh request, aborting', myId);
+          return false; // Stale request
+        }
+        console.log('[AUTH] Attempting fetchMe...');
         const data = await fetchMe();
+        console.log('[AUTH] fetchMe result:', data);
         
         if (data?.authenticated && data.user) {
           if (myId === latestRefreshId.current) {
+            console.log('[AUTH] Setting user from refresh:', data.user);
             setUser(data.user);
           }
           return true; // Authenticated
         } else {
+          console.log('[AUTH] Not authenticated or no user data');
           // Only set to null if we got a clear "not authenticated" response
           if (data && data.authenticated === false) {
+            console.log('[AUTH] Explicitly setting user to null');
             setUser(null);
           }
           return false; // Not authenticated
         }
       } catch (error) {
+        console.error('[AUTH] fetchMe error:', error);
         if (myId !== latestRefreshId.current) return false;
         // Don't clear user on network errors - keep existing state
         return false;
@@ -85,17 +95,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
     const initAuth = async () => {
+      console.log('[AUTH] Initializing auth check...');
       try {
         const data = await fetchMe();
+        console.log('[AUTH] Initial fetchMe result:', data);
         if (!mounted) return; // Component unmounted
         if (data?.authenticated && data.user) {
+          console.log('[AUTH] Setting user from initial auth check:', data.user);
           setUser(data.user);
+        } else {
+          console.log('[AUTH] No authenticated user found on init');
         }
         // Don't set user to null here - let user remain unauthenticated by default
-      } catch {
+      } catch (error) {
+        console.error('[AUTH] Initial auth check failed:', error);
         // Don't clear user on network errors during init
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          console.log('[AUTH] Setting loading to false');
+          setLoading(false);
+        }
       }
     };
 
