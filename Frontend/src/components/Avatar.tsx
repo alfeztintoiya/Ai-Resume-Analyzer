@@ -1,10 +1,10 @@
 import React from 'react';
-import type { User } from '../types/user';
+import type { AuthUser } from '../contexts/AuthContext';
 import { getUserAvatarData } from '../utils/avatarUtils';
 import './Avatar.css';
 
 interface AvatarProps {
-  user: User | null;
+  user: AuthUser | null;
   size?: 'small' | 'medium' | 'large' | 'extra-large';
   className?: string;
   onClick?: () => void;

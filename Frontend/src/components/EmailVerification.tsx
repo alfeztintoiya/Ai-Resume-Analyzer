@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 const EmailVerification: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { checkAuth } = useAuth();
+  const { refreshUser } = useAuth();
   const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
   const [message, setMessage] = useState('');
 
@@ -28,7 +28,7 @@ const EmailVerification: React.FC = () => {
           setStatus('success');
           setMessage('Your email has been verified successfully! You are now logged in.');
           // Update auth context
-          await checkAuth();
+          await refreshUser();
           // Redirect to dashboard or home after 3 seconds
           setTimeout(() => {
             navigate('/');
@@ -44,7 +44,7 @@ const EmailVerification: React.FC = () => {
     };
 
     verifyEmail();
-  }, [searchParams, checkAuth, navigate]);
+  }, [searchParams, refreshUser, navigate]);
 
   return (
     <div className="flex items-center justify-center min-h-screen p-4 bg-gradient-to-br from-blue-50 to-indigo-100">

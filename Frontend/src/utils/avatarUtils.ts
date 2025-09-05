@@ -1,4 +1,4 @@
-import type { User } from '../types/user';
+import type { AuthUser } from '../contexts/AuthContext';
 
 /**
  * Generate a consistent color based on user's name or email
@@ -42,7 +42,7 @@ export const generateAvatarColor = (text: string): string => {
 /**
  * Get user's initials for avatar
  */
-export const getUserInitials = (user: User | null): string => {
+export const getUserInitials = (user: AuthUser | null): string => {
   if (!user) return 'U';
   
   // Try to get initials from name first
@@ -69,7 +69,7 @@ export const getUserInitials = (user: User | null): string => {
 /**
  * Get background color for user avatar
  */
-export const getUserAvatarColor = (user: User | null): string => {
+export const getUserAvatarColor = (user: AuthUser | null): string => {
   if (!user) return '#6b7280';
   
   // Use name for color generation, fallback to email
@@ -80,17 +80,17 @@ export const getUserAvatarColor = (user: User | null): string => {
 /**
  * Check if user has a profile picture
  */
-export const hasProfilePicture = (user: User | null): boolean => {
+export const hasProfilePicture = (user: AuthUser | null): boolean => {
   if (!user) return false;
-  return !!(user.profilePic || user.profile_pic);
+  return !!(user.avatarUrl);
 };
 
 /**
  * Get user's profile picture URL
  */
-export const getProfilePictureUrl = (user: User | null): string | null => {
+export const getProfilePictureUrl = (user: AuthUser | null): string | null => {
   if (!user) return null;
-  return user.profilePic || user.profile_pic || null;
+  return user.avatarUrl || null;
 };
 
 /**
@@ -104,7 +104,7 @@ export interface AvatarData {
   textColor: string;
 }
 
-export const getUserAvatarData = (user: User | null): AvatarData => {
+export const getUserAvatarData = (user: AuthUser | null): AvatarData => {
   const hasImage = hasProfilePicture(user);
   const initials = getUserInitials(user);
   const backgroundColor = getUserAvatarColor(user);

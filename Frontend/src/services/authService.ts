@@ -1,5 +1,4 @@
 import type { AuthResponse, CreateUserData, LoginData } from '../types';
-import { normalizeUser } from '../utils/userUtils';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -26,7 +25,7 @@ class AuthService {
       }
 
       const user = await response.json();
-      return { success: true, user: normalizeUser(user) };
+      return { success: true, user };
     } catch (error) {
       console.error('Auth error:', error);
       return { success: false, message: 'Authentication failed' };
